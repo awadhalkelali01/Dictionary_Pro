@@ -1,4 +1,4 @@
-const CACHE_NAME = "student-dictionary-cache-v1.1";
+const CACHE_NAME = "student-dictionary-cache-v1.2";
 
 const ASSETS = [
   "index.html",
@@ -52,4 +52,5 @@ self.addEventListener("fetch", (event) => {
     })
   );
 });
+
 
