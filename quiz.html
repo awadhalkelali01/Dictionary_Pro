@@ -1,0 +1,1063 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>الاختبارات | قاموس الطالب</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet" />
+
+    <link rel="stylesheet" href="style.css" />
+
+<link rel="manifest" href="manifest.json">
+
+<script>
+if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+        navigator.serviceWorker.register("service-worker.js")
+            .catch(err => console.log("SW registration failed:", err));
+    });
+}
+</script>
+
+    <style>
+        .setup-wrapper {
+            max-width: 680px;
+            margin: 1.5rem auto;
+        }
+
+        .quiz-header {
+            display: flex;
+            justify-content: space-between;
+            gap: .75rem;
+            align-items: center;
+            margin-bottom: .75rem;
+        }
+
+        .quiz-title-box h2 {
+            margin: 0;
+        }
+
+        .quiz-progress {
+            font-size: .85rem;
+            color: #9ca3af;
+            margin-top: .25rem;
+        }
+
+        .quiz-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: .35rem;
+        }
+
+        .quiz-controls .btn.small {
+            padding: 4px 10px;
+            font-size: .75rem;
+        }
+
+        .quiz-timer {
+            font-size: .9rem;
+            color: #e5e7eb;
+            margin-bottom: .4rem;
+        }
+
+        .quiz-progress-bar {
+            background: #111827;
+            border-radius: 999px;
+            overflow: hidden;
+            height: 6px;
+            margin-bottom: 1rem;
+        }
+
+        #quiz-progress-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #06b6d4, #22c55e);
+            transition: width .2s ease-out;
+        }
+
+        .quiz-box {
+            background: #020617;
+            border-radius: .75rem;
+            padding: 1rem;
+            border: 1px solid #1f2937;
+            min-height: 110px;
+        }
+
+        .quiz-question-text {
+            font-size: 1rem;
+            margin-bottom: .75rem;
+        }
+
+        .quiz-word {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #f9fafb;
+        }
+
+        .quiz-sentence {
+            font-size: .95rem;
+            margin-bottom: .35rem;
+            color: #e5e7eb;
+        }
+
+        .quiz-sentence-ar {
+            font-size: .9rem;
+            margin-bottom: .75rem;
+            color: #9ca3af;
+        }
+
+        .quiz-options {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: .5rem;
+            margin-top: .5rem;
+        }
+
+        @media (min-width: 640px) {
+            .quiz-options {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        .quiz-option-card {
+            border-radius: .75rem;
+            border: 1px solid #1f2937;
+            background: #020617;
+            padding: .6rem .75rem;
+            text-align: center;
+            cursor: pointer;
+            font-size: .95rem;
+            transition: all .15s ease;
+        }
+
+        .quiz-option-card:hover:not(.disabled) {
+            background: #0f172a;
+            border-color: #1d4ed8;
+        }
+
+        .quiz-option-card.correct {
+            border-color: #16a34a;
+            background: #052e16;
+        }
+
+        .quiz-option-card.wrong {
+            border-color: #b91c1c;
+            background: #450a0a;
+        }
+
+        .quiz-feedback {
+            margin-top: .7rem;
+            min-height: 1.4rem;
+            font-size: .9rem;
+        }
+
+        .quiz-feedback.success {
+            color: #22c55e;
+        }
+
+        .quiz-feedback.error {
+            color: #f97316;
+        }
+
+        .quiz-input {
+            margin-top: .5rem;
+            margin-bottom: .5rem;
+        }
+
+        .result-summary {
+            margin-top: 1rem;
+            font-size: .95rem;
+            color: #e5e7eb;
+        }
+
+        .weak-list {
+            margin-top: .75rem;
+            list-style: disc;
+            padding-right: 1.2rem;
+            font-size: .9rem;
+            color: #e5e7eb;
+        }
+
+        .weak-list li {
+            margin-bottom: .25rem;
+        }
+/* -------- تحسين حجم الأزرار -------- */
+.quiz-controls .btn.small {
+    padding: 8px 18px;
+    font-size: 0.95rem;
+    border-radius: 10px;
+}
+
+/* -------- تمركز السؤال وتكبير الخط -------- */
+.quiz-question-text {
+    text-align: center;
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+}
+
+.quiz-word {
+    font-size: 2rem !important;
+    font-weight: 700;
+    color: #ffffff;
+    display: inline-block;
+    margin-top: 0.5rem;
+}
+
+/* -------- تمركز محتوى صندوق السؤال بالكامل -------- */
+.quiz-box {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+    /* ===== تعديلات السؤال والخيارات ===== */
+
+    /* إعادة حجم أزرار الاختيارات */
+    .quiz-option-card {
+        font-size: 1.1rem;
+        padding: 0.9rem 1rem;
+        border-radius: 12px;
+    }
+
+    /* إصلاح تمدد الخيارات داخل الصندوق */
+    .quiz-options {
+        width: 100%;
+        max-width: 480px;
+        margin: 0 auto;
+    }
+
+    /* تحسين المسافات */
+    .quiz-word {
+        margin-bottom: 0.75rem;
+    }
+
+    .quiz-question-text {
+        margin-bottom: 1.2rem;
+    }
+.confirm-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.55);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+}
+
+.confirm-modal-box {
+    background: #0f172a;
+    border: 1px solid #334155;
+    border-radius: 10px;
+    padding: 1.5rem;
+    width: 280px;
+    text-align: center;
+    color: #e2e8f0;
+    font-size: 1rem;
+}
+
+.confirm-modal-actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 1.2rem;
+}
+
+    </style>
+</head>
+
+<body>
+<div class="app-shell">
+
+<header class="app-header">
+    <div class="container header-content">
+
+        <div class="brand">
+            <div class="brand-mark"><span>A+</span></div>
+            <div>
+                <div class="brand-title">قاموس الطالب</div>
+                <div class="brand-subtitle-en">Student Dictionary</div>
+            </div>
+        </div>
+
+        <button class="nav-toggle" aria-expanded="false">
+            <span class="nav-toggle-bar"></span>
+            <span class="nav-toggle-bar"></span>
+            <span class="nav-toggle-bar"></span>
+        </button>
+
+        <nav class="main-nav">
+            <a href="index.html" class="nav-link">الرئيسية</a>
+            <a href="students.html" class="nav-link">الطلاب</a>
+            <a href="dictionary.html" class="nav-link">القاموس</a>
+            <a href="quiz.html" class="nav-link active">الاختبارات</a>
+            <a href="about.html" class="nav-link">عن القاموس</a>
+            <a href="help.html" class="nav-link">مساعدة</a>
+        </nav>
+
+    </div>
+</header>
+
+<main class="app-main">
+<div class="container">
+
+<header class="page-header">
+    <h1 class="page-title">إنشاء اختبار للطالب</h1>
+    <p class="page-description">
+        اختر الطالب ونوع الاختبار وعدد الأسئلة.
+    </p>
+</header>
+
+<section class="card setup-wrapper" id="setup-card">
+    <h2 class="card-title">إعداد الاختبار</h2>
+
+    <div class="form-grid">
+
+        <div class="form-field">
+            <label class="form-label" for="quiz-student">الطالب</label>
+            <select id="quiz-student" class="form-control">
+                <option value="">اختر الطالب...</option>
+            </select>
+        </div>
+
+        <div class="form-field">
+            <label class="form-label" for="quiz-type">نوع الاختبار</label>
+            <select id="quiz-type" class="form-control">
+                <option value="mcq">اختيار من متعدد</option>
+                <option value="fill">إكمال الجملة</option>
+                <option value="spell">تهجئة</option>
+            </select>
+        </div>
+
+        <div class="form-field">
+            <label class="form-label" for="quiz-count">عدد الأسئلة</label>
+            <input type="number" id="quiz-count" class="form-control" value="5" min="1" max="50" />
+        </div>
+
+    </div>
+
+    <p id="setup-error" class="field-error" style="margin-top:0.5rem;"></p>
+
+    <div class="form-actions">
+        <button id="start-quiz-btn" class="btn btn-primary">بدء الاختبار</button>
+    </div>
+</section>
+
+<section class="card" id="student-info-card" style="display:none; margin-bottom:1.25rem;">
+    <h2 class="card-title">بيانات الطالب</h2>
+
+    <!-- صورة الطالب -->
+    <div id="si-avatar" style="
+        width:64px;
+        height:64px;
+        border-radius:50%;
+        background:#1e3a8a;
+        color:white;
+        display:flex;
+        justify-content:center;
+        align-items:center;
+        font-size:1.6rem;
+        font-weight:700;
+        margin-bottom:0.75rem;
+    "></div>
+
+    <p><strong>الاسم:</strong> <span id="si-name"></span></p>
+    <p><strong>الصف:</strong> <span id="si-grade"></span></p>
+    <p><strong>عدد كلمات القاموس:</strong> <span id="si-words">0</span></p>
+</section>
+<!-- قسم الاختبار -->
+<section class="card" id="quiz-card" style="display:none;">
+    <div class="quiz-header">
+        <div class="quiz-title-box">
+            <h2 class="card-title" id="quiz-question-title">السؤال</h2>
+            <p class="quiz-progress">
+                السؤال <span id="current-index">1</span> من <span id="total-questions">1</span>
+            </p>
+        </div>
+
+        <div class="quiz-controls">
+            <button id="pause-btn" class="btn btn-outline small">⏸ إيقاف</button>
+            <button id="resume-btn" class="btn btn-outline small" style="display:none;">▶️ متابعة</button>
+            <button id="stop-btn" class="btn btn-outline small">🔁 إنهاء</button>
+            <button id="exit-btn" class="btn btn-outline small">🏠 الرئيسية</button>
+            <button id="speak-question-btn" class="btn btn-outline small">🔊 نطق</button>
+        </div>
+    </div>
+
+    <p class="quiz-timer">
+        الوقت: <span id="quiz-time">0</span> ثانية
+    </p>
+
+    <div class="quiz-progress-bar">
+        <div id="quiz-progress-fill"></div>
+    </div>
+
+    <div id="quiz-question-box" class="quiz-box">
+        <!-- السؤال يحقن هنا -->
+    </div>
+
+    <div id="quiz-feedback" class="quiz-feedback"></div>
+
+    <div class="form-actions" id="quiz-actions" style="margin-top:1rem;">
+        <button id="next-question-btn" class="btn btn-primary" style="display:none;">السؤال التالي</button>
+    </div>
+</section>
+
+<!-- نتيجة -->
+<section class="card" id="result-card" style="display:none;">
+    <h2 class="card-title">نتيجة الاختبار</h2>
+
+    <p class="result-summary">
+        الدرجة: <strong><span id="result-score"></span></strong>
+        من <strong><span id="result-total"></span></strong>
+        (<span id="result-percent"></span>%)
+    </p>
+
+    <p class="result-summary">
+        الزمن المستغرق: <span id="result-time"></span> ثانية
+    </p>
+
+    <p id="result-message" class="result-summary"></p>
+
+    <div class="result-summary">
+        <strong>الكلمات التي تحتاج مراجعة:</strong>
+        <ul id="weak-list" class="weak-list"></ul>
+    </div>
+
+    <div class="form-actions" style="margin-top:1rem;">
+        <button id="retry-btn" class="btn btn-primary">إعادة نفس الاختبار</button>
+        <button id="back-btn" class="btn btn-outline">العودة لإعداد اختبار جديد</button>
+    </div>
+</section>
+
+</div>
+</main>
+
+<footer class="app-footer">
+    <div class="container footer-content" style="
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        gap:1rem;
+        flex-wrap:wrap;
+        padding:1rem 0;
+    ">
+        <div style="color:#e5e7eb; font-weight:700; font-size:1rem;">
+            قاموس الطالب
+        </div>
+        <div style="color:#94a3b8; font-size:0.9rem; text-align:center;">
+            تصميم وتنفيذ: أبو عبدالله — جميع الحقوق محفوظة 2026
+        </div>
+        <div style="color:#cbd5e1; font-size:0.9rem;">
+            منصة تعليمية لمراجعة المفردات
+        </div>
+    </div>
+</footer>
+
+</div> <!-- /app-shell -->
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const STORAGE_STUDENTS = "student";
+    const DICT_KEY_PREFIX  = "studentDictionary_";
+    const TEST_KEY_PREFIX  = "studentTests_";
+
+    const url       = new URL(window.location.href);
+    const urlMode   = url.searchParams.get("mode") || "general";
+    const urlSid    = url.searchParams.get("sid") || url.searchParams.get("student") || localStorage.getItem("selectedStudent") || "";
+
+    const studentSelect = document.getElementById("quiz-student");
+    const typeSelect = document.getElementById("quiz-type");
+    const countInput = document.getElementById("quiz-count");
+    const startBtn = document.getElementById("start-quiz-btn");
+    const setupCard = document.getElementById("setup-card");
+    const setupErrorEl = document.getElementById("setup-error");
+
+    const infoCard  = document.getElementById("student-info-card");
+    const siAvatar  = document.getElementById("si-avatar");   /* << الصورة */
+    const siName    = document.getElementById("si-name");
+    const siGrade   = document.getElementById("si-grade");
+    const siWords   = document.getElementById("si-words");
+
+    const quizCard      = document.getElementById("quiz-card");
+    const questionBox   = document.getElementById("quiz-question-box");
+    const feedbackBox   = document.getElementById("quiz-feedback");
+    const nextBtn       = document.getElementById("next-question-btn");
+    const speakBtn      = document.getElementById("speak-question-btn");
+    const pauseBtn      = document.getElementById("pause-btn");
+    const resumeBtn     = document.getElementById("resume-btn");
+    const stopBtn       = document.getElementById("stop-btn");
+    const exitBtn       = document.getElementById("exit-btn");
+    const timeEl        = document.getElementById("quiz-time");
+    const progressFill  = document.getElementById("quiz-progress-fill");
+    const currentIndexEl= document.getElementById("current-index");
+    const totalEl       = document.getElementById("total-questions");
+
+    const resultCard      = document.getElementById("result-card");
+    const resultScoreEl   = document.getElementById("result-score");
+    const resultTotalEl   = document.getElementById("result-total");
+    const resultPercentEl = document.getElementById("result-percent");
+    const resultTimeEl    = document.getElementById("result-time");
+    const resultMsgEl     = document.getElementById("result-message");
+    const weakListEl      = document.getElementById("weak-list");
+    const retryBtn        = document.getElementById("retry-btn");
+    const backBtn         = document.getElementById("back-btn");
+
+    const navToggle = document.querySelector(".nav-toggle");
+    const mainNav   = document.querySelector(".main-nav");
+    if (navToggle && mainNav) {
+        navToggle.addEventListener("click", () => {
+            const open = mainNav.classList.toggle("nav-open");
+            navToggle.classList.toggle("nav-open", open);
+            navToggle.setAttribute("aria-expanded", open ? "true" : "false");
+        });
+    }
+
+    let students = [];
+    let dictionary = [];
+    let quiz = [];
+    let results = [];
+    let index = 0;
+    let score = 0;
+    let timerId = null;
+    let elapsedSec = 0;
+    let isPaused = false;
+    let currentSpeakText = "";
+    let currentType = "mcq";
+    let currentStudentId = "";
+
+    function loadStudents() {
+        try {
+            students = JSON.parse(localStorage.getItem(STORAGE_STUDENTS)) || [];
+        } catch {
+            students = [];
+        }
+
+        studentSelect.innerHTML = '<option value="">اختر الطالب...</option>';
+
+        students.forEach(s => {
+            if (!s || !s.id) return;
+
+            const op = document.createElement("option");
+            op.value = s.id;
+            op.textContent = s.name + (s.grade ? " — " + s.grade : "");
+            studentSelect.appendChild(op);
+        });
+
+        if (urlSid) {
+            const st = students.find(s => s.id === urlSid);
+            if (st) {
+                studentSelect.value = st.id;
+                currentStudentId = st.id;
+                updateStudentInfo();
+
+                if (urlMode === "fast" || urlMode === "weak" || urlMode === "today") {
+                    startQuiz(true);
+                }
+            }
+        }
+    }
+
+    function loadDictionary(id) {
+        try {
+            dictionary = JSON.parse(localStorage.getItem(DICT_KEY_PREFIX + id)) || [];
+        } catch {
+            dictionary = [];
+        }
+    }
+
+    function setSetupError(msg) {
+        setupErrorEl.textContent = msg || "";
+    }
+
+    function updateStudentInfo() {
+        const sid = studentSelect.value;
+        if (!sid) {
+            infoCard.style.display = "none";
+            return;
+        }
+
+        const st = students.find(s => s.id === sid);
+        if (!st) {
+            infoCard.style.display = "none";
+            return;
+        }
+
+        currentStudentId = sid;
+        loadDictionary(sid);
+
+        /* اسم، صف، عدد كلمات */
+        siName.textContent  = st.name || "";
+        siGrade.textContent = st.grade || "";
+        siWords.textContent = dictionary.length || 0;
+
+        /* صورة الطالب */
+        if (st.avatar) {
+            siAvatar.style.backgroundImage = `url('${st.avatar}')`;
+            siAvatar.style.backgroundSize = "cover";
+            siAvatar.style.backgroundPosition = "center";
+            siAvatar.textContent = "";
+        } else {
+            siAvatar.style.backgroundImage = "";
+            siAvatar.textContent = (st.name ? st.name.charAt(0) : "?");
+        }
+
+        infoCard.style.display = "block";
+    }
+
+    studentSelect.addEventListener("change", updateStudentInfo);
+    /* ========= توليد أنواع الأسئلة ========= */
+
+    function shuffle(arr) {
+        return [...arr].sort(() => Math.random() - 0.5);
+    }
+
+    function getRandom(arr, n) {
+        return shuffle(arr).slice(0, n);
+    }
+
+    function makeMCQ(item) {
+        currentSpeakText = item.en || "";
+        const correctAr = item.ar || "";
+
+        const others = dictionary
+            .filter(w => w.ar && w.en !== item.en)
+            .map(w => w.ar);
+
+        const options = getRandom(others, 3);
+        options.push(correctAr);
+        const final = shuffle(options);
+
+        item.__correctAnswer = correctAr;
+
+        return `
+            <p class="quiz-question-text">
+                ما معنى الكلمة التالية؟
+                <br>
+                <span class="quiz-word" dir="ltr">${item.en || ""}</span>
+            </p>
+            <div class="quiz-options">
+                ${final.map(t => `
+                    <button class="quiz-option-card" data-value="${t}">
+                        ${t}
+                    </button>
+                `).join("")}
+            </div>
+        `;
+    }
+
+    function makeSpelling(item) {
+        currentSpeakText = item.en || "";
+        const correct = (item.en || "").trim().toLowerCase();
+        item.__correctAnswer = correct;
+
+        return `
+            <p class="quiz-question-text">
+                اكتب الكلمة الإنجليزية للمعنى:
+                <br>
+                <span class="quiz-word">${item.ar || ""}</span>
+            </p>
+            <input type="text" id="spell-input" class="form-control quiz-input" dir="ltr">
+            <button id="spell-check" class="btn btn-primary">تحقق</button>
+        `;
+    }
+
+    function makeFill(item) {
+        const se = item.sentence_en || "";
+        const sa = item.sentence_ar || "";
+        const word = item.en || "";
+
+        if (!se || !word) return makeMCQ(item);
+
+        const blank = se.replace(new RegExp(word, "i"), "_____");
+
+        const others = dictionary
+            .filter(w => w.en && w.en !== item.en)
+            .map(w => w.en);
+
+        const options = getRandom(others, 3);
+        options.push(word);
+        const final = shuffle(options);
+
+        currentSpeakText = se;
+        item.__correctAnswer = word;
+
+        return `
+            <p class="quiz-sentence" dir="ltr">${blank}</p>
+            ${sa ? `<p class="quiz-sentence-ar">${sa}</p>` : ""}
+            <div class="quiz-options">
+                ${final.map(t => `
+                    <button class="quiz-option-card" data-value="${t}">
+                        ${t}
+                    </button>
+                `).join("")}
+            </div>
+        `;
+    }
+
+    /* ========= عرض السؤال ========= */
+
+    function showQuestion() {
+        if (!quiz.length || index >= quiz.length) return;
+
+        const item = quiz[index];
+        feedbackBox.textContent = "";
+        feedbackBox.className = "quiz-feedback";
+
+        currentIndexEl.textContent = index + 1;
+        totalEl.textContent = quiz.length;
+
+        const pct = (index / quiz.length) * 100;
+        progressFill.style.width = pct.toFixed(1) + "%";
+
+        let html = "";
+        if (currentType === "mcq") html = makeMCQ(item);
+        else if (currentType === "fill") html = makeFill(item);
+        else html = makeSpelling(item);
+
+        questionBox.innerHTML = html;
+        speakBtn.disabled = !currentSpeakText;
+
+        nextBtn.style.display = "none";
+    }
+
+    /* ========= التصحيح ========= */
+
+    function checkAnswer(ansRaw) {
+        const item = quiz[index];
+        const correct = (item.__correctAnswer || item.en || "").trim().toLowerCase();
+        const given = (ansRaw || "").trim().toLowerCase();
+
+        const ok = (given === correct);
+        results[index] = { item, correct: ok };
+
+        if (ok) {
+            score++;
+            feedbackBox.textContent = "إجابة صحيحة!";
+            feedbackBox.classList.add("success");
+        } else {
+            feedbackBox.textContent = "إجابة خاطئة. الإجابة الصحيحة: " + (item.ar || "");
+            feedbackBox.classList.add("error");
+        }
+
+        const btns = questionBox.querySelectorAll(".quiz-option-card");
+        btns.forEach(btn => {
+            btn.disabled = true;
+            const v = btn.dataset.value.trim().toLowerCase();
+            if (v === correct) btn.classList.add("correct");
+            else if (v === given) btn.classList.add("wrong");
+        });
+
+        nextBtn.style.display = "inline-flex";
+    }
+
+    /* ========= المؤقت ========= */
+
+    function startTimer() {
+        clearInterval(timerId);
+        elapsedSec = 0;
+        isPaused = false;
+        timeEl.textContent = "0";
+
+        timerId = setInterval(() => {
+            if (!isPaused) {
+                elapsedSec++;
+                timeEl.textContent = elapsedSec.toString();
+            }
+        }, 1000);
+    }
+
+    function stopTimer() {
+        clearInterval(timerId);
+        timerId = null;
+    }
+
+    /* ========= بدء الاختبار ========= */
+
+    function startQuiz(autoStart) {
+        setSetupError("");
+
+        const sid = currentStudentId || studentSelect.value;
+        if (!sid) return setSetupError("الرجاء اختيار الطالب.");
+
+        const st = students.find(s => s.id === sid);
+        if (!st) return setSetupError("تعذر العثور على بيانات الطالب.");
+
+        currentStudentId = sid;
+        loadDictionary(sid);
+
+        if (!dictionary.length) {
+            return setSetupError("لا توجد كلمات لهذا الطالب.");
+        }
+
+        let active = [...dictionary];
+
+        // كلمات ضعيفة
+        if (urlMode === "weak") {
+            active = active.filter(w => (w.wrongCount || 0) > 0);
+            if (!active.length) return setSetupError("لا توجد كلمات ضعيفة.");
+            currentType = "mcq";
+        }
+        // كلمات اليوم – نفس أسلوب index.html
+        else if (urlMode === "today") {
+            const todayISO = new Date().toISOString().slice(0, 10);
+            active = active.filter(w => (w.createdAt || "").startsWith(todayISO));
+            if (!active.length) return setSetupError("لا توجد كلمات مضافة اليوم.");
+            currentType = "mcq";
+        }
+        // اختبار سريع
+        else if (urlMode === "fast") {
+            currentType = "mcq";
+        }
+        // يدوي
+        else {
+            currentType = typeSelect.value || "mcq";
+        }
+
+        if (currentType === "fill") {
+            active = active.filter(w => w.sentence_en);
+            if (!active.length) return setSetupError("لا توجد كلمات تحتوي جمل.");
+        }
+
+        let count = 0;
+        if (urlMode === "fast" || urlMode === "weak" || urlMode === "today") {
+            count = Math.min(5, active.length);
+        } else {
+            count = Math.min(Number(countInput.value) || 5, active.length);
+        }
+
+        quiz = getRandom(active, count);
+        if (!quiz.length) return setSetupError("لا توجد كلمات كافية.");
+
+        results = new Array(quiz.length);
+        index = 0;
+        score = 0;
+
+        siName.textContent  = st.name;
+        siGrade.textContent = st.grade;
+        siWords.textContent = dictionary.length;
+
+        infoCard.style.display = "block";
+        setupCard.style.display = "none";
+        resultCard.style.display = "none";
+        quizCard.style.display = "block";
+
+        startTimer();
+        showQuestion();
+    }
+/* ========= حفظ النتيجة ========= */
+
+function saveTestResult(studentId, score, total, mode) {
+    if (!studentId) return;
+
+    const key = TEST_KEY_PREFIX + studentId;
+    let tests = [];
+
+    try { tests = JSON.parse(localStorage.getItem(key)) || []; } catch {}
+
+    const now = Date.now();
+    tests.push({
+        score,
+        total,
+        mode: mode || urlMode,
+        date: now
+    });
+
+    localStorage.setItem(key, JSON.stringify(tests));
+
+    try {
+        const arr = JSON.parse(localStorage.getItem(STORAGE_STUDENTS)) || [];
+        const i = arr.findIndex(s => s.id === studentId);
+        if (i !== -1) {
+            const percent = total ? Math.round(score / total * 100) : 0;
+            arr[i].lastScore = percent;
+            arr[i].lastUpdate = new Date().toISOString();
+            arr[i].lastTestDate = new Date().toISOString();
+            localStorage.setItem(STORAGE_STUDENTS, JSON.stringify(arr));
+        }
+    } catch {}
+}
+
+/* ========= النتيجة ========= */
+
+function showResult() {
+    stopTimer();
+
+    quizCard.style.display = "none";
+    setupCard.style.display = "none";
+    resultCard.style.display = "block";
+
+    const percent = quiz.length ? Math.round(score / quiz.length * 100) : 0;
+
+    resultScoreEl.textContent   = score;
+    resultTotalEl.textContent   = quiz.length;
+    resultPercentEl.textContent = percent;
+    resultTimeEl.textContent    = elapsedSec;
+
+    if (score === quiz.length) resultMsgEl.textContent = "إبداع! إجابات ممتازة.";
+    else if (percent >= 70)     resultMsgEl.textContent = "جيد جداً! تابع التقدم.";
+    else                        resultMsgEl.textContent = "بحاجة إلى مزيد من المراجعة.";
+
+    weakListEl.innerHTML = "";
+    results.forEach(r => {
+        if (!r || r.correct) return;
+        const li = document.createElement("li");
+        li.textContent = `${r.item.en} — ${r.item.ar}`;
+        weakListEl.appendChild(li);
+    });
+
+    updateWrongCounts(currentStudentId);
+saveTestResult(currentStudentId, score, quiz.length, urlMode);
+
+}
+/* ========= تحديث عداد الأخطاء للكلمات ========= */
+
+function updateWrongCounts(studentId) {
+    const key = DICT_KEY_PREFIX + studentId;
+    let arr = [];
+
+    try { arr = JSON.parse(localStorage.getItem(key)) || []; } catch {}
+
+    results.forEach(r => {
+        if (!r || !r.item || !r.item.en) return;
+
+        const wordEn = r.item.en.toLowerCase();
+        const i = arr.findIndex(w => (w.en || "").toLowerCase() === wordEn);
+        if (i === -1) return;
+
+        let prev = arr[i].wrongCount || 0;
+
+        if (r.correct) {
+            arr[i].wrongCount = Math.max(prev - 1, 0);
+        } else {
+            arr[i].wrongCount = prev + 1;
+        }
+    });
+
+    localStorage.setItem(key, JSON.stringify(arr));
+}
+
+/* ========= الأحداث ========= */
+
+startBtn.addEventListener("click", () => startQuiz(false));
+
+quizCard.addEventListener("click", e => {
+    const opt = e.target.closest(".quiz-option-card");
+    if (opt && nextBtn.style.display === "none") {
+        return checkAnswer(opt.dataset.value || "");
+    }
+
+    if (e.target.id === "spell-check" && nextBtn.style.display === "none") {
+        const inp = document.getElementById("spell-input");
+        return checkAnswer(inp ? inp.value : "");
+    }
+});
+
+nextBtn.addEventListener("click", () => {
+    index++;
+    if (index >= quiz.length) showResult();
+    else showQuestion();
+});
+
+pauseBtn.addEventListener("click", () => {
+    isPaused = true;
+    pauseBtn.style.display = "none";
+    resumeBtn.style.display = "inline-flex";
+});
+
+resumeBtn.addEventListener("click", () => {
+    isPaused = false;
+    resumeBtn.style.display = "none";
+    pauseBtn.style.display = "inline-flex";
+});
+
+stopBtn.addEventListener("click", () => {
+    askConfirm("هل تريد إنهاء الاختبار؟").then(ok => {
+        if (!ok) return;
+
+        stopTimer();
+        quizCard.style.display = "none";
+        resultCard.style.display = "none";
+        setupCard.style.display = "block";
+    });
+});
+
+exitBtn.addEventListener("click", () => {
+    window.location.href = "index.html";
+});
+
+retryBtn.addEventListener("click", () => {
+    index = 0;
+    score = 0;
+    results = new Array(quiz.length);
+    resultCard.style.display = "none";
+    quizCard.style.display = "block";
+    startTimer();
+    showQuestion();
+});
+
+backBtn.addEventListener("click", () => {
+    resultCard.style.display = "none";
+    quizCard.style.display = "none";
+    setupCard.style.display = "block";
+});
+/* ========= زر النطق ========= */
+
+speakBtn.addEventListener("click", function () {
+    if (!currentSpeakText) return;
+
+    try {
+        const utter = new SpeechSynthesisUtterance(currentSpeakText);
+        utter.lang = "en-US";
+        utter.rate = 0.95;
+
+        speechSynthesis.cancel();
+        speechSynthesis.speak(utter);
+    } catch (e) {
+        console.error("Speech error:", e);
+    }
+});
+
+/* ========= تشغيل أولي ========= */
+
+loadStudents();
+if (studentSelect.value) updateStudentInfo();
+
+
+});
+function askConfirm(message) {
+    return new Promise(resolve => {
+
+        const modal = document.getElementById("confirm-modal");
+        const msg   = document.getElementById("confirm-message");
+        const yesBtn= document.getElementById("confirm-yes");
+        const noBtn = document.getElementById("confirm-no");
+
+        msg.textContent = message;
+        modal.style.display = "flex";
+
+        const close = () => modal.style.display = "none";
+
+        yesBtn.onclick = () => { close(); resolve(true); };
+        noBtn.onclick  = () => { close(); resolve(false); };
+    });
+}
+
+</script>
+<!-- Modal Confirm -->
+<div id="confirm-modal" class="confirm-modal-overlay" style="display:none;">
+    <div class="confirm-modal-box">
+        <p id="confirm-message">هل أنت متأكد؟</p>
+
+        <div class="confirm-modal-actions">
+            <button id="confirm-yes" class="btn btn-primary">نعم</button>
+            <button id="confirm-no" class="btn btn-outline">لا</button>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>الرئيسية | قاموس الطالب</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet" />
+
+    <link rel="stylesheet" href="style.css" />
+
+<link rel="manifest" href="manifest.json">
+
+<script>
+if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+        navigator.serviceWorker.register("service-worker.js")
+            .catch(err => console.log("SW registration failed:", err));
+    });
+}
+</script>
+
+    <style>
+        /* تصميم البطاقات */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        .stat-card {
+            background: #0f172a;
+            border: 1px solid #1e293b;
+            border-radius: .75rem;
+            padding: 1rem;
+            text-align: center;
+        }
+        .stat-title {
+            font-size: .9rem;
+            color: #94a3b8;
+            margin-bottom: .4rem;
+        }
+        .stat-number {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #38bdf8;
+        }
+        .stat-date {
+            margin-top: .35rem;
+            font-size: .85rem;
+            color: #94a3b8;
+        }
+
+        /* Footer */
+        .footer-layout {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+            text-align: center;
+            padding: 1.2rem 0;
+        }
+        .footer-right {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #e5e7eb;
+        }
+        .footer-center {
+            font-size: .9rem;
+            color: #94a3b8;
+        }
+        .footer-left {
+            font-size: .9rem;
+            color: #cbd5e1;
+        }
+    </style>
+</head>
+
+<body>
+<div class="app-shell">
+
+    <!-- HEADER -->
+    <header class="app-header">
+        <div class="container header-content">
+
+            <div class="brand">
+                <div class="brand-mark"><span>A+</span></div>
+                <div>
+                    <div class="brand-title">قاموس الطالب</div>
+                    <div class="brand-subtitle-en">Student Dictionary</div>
+                </div>
+            </div>
+
+            <button class="nav-toggle" aria-expanded="false">
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+            </button>
+
+            <nav class="main-nav">
+                <a href="index.html" class="nav-link active">الرئيسية</a>
+                <a href="students.html" class="nav-link">الطلاب</a>
+                <a href="dictionary.html" class="nav-link">القاموس</a>
+                <a href="quiz.html" class="nav-link">الاختبارات</a>
+                <a href="about.html" class="nav-link">عن القاموس</a>
+                <a href="help.html" class="nav-link">مساعدة</a>
+            </nav>
+
+        </div>
+    </header>
+
+    <!-- MAIN -->
+    <main class="app-main">
+        <div class="container">
+
+            <!-- HERO -->
+            <section class="card" style="text-align:center; margin-bottom:1.5rem;">
+                <h1 class="card-title" style="font-size:1.6rem;">منصة بسيطة وذكية لمراجعة مفردات اللغة الإنجليزية</h1>
+                <p class="card-description" style="line-height:1.9;">
+                    أضف أبناءك، نظّم مفرداتهم، وتابع مستوى تقدمهم في المفردات والاختبارات بسهولة.
+                </p>
+
+                <div style="margin-top:1.2rem;">
+                    <a href="students.html" class="btn btn-primary" style="margin:0 .4rem;">إدارة الطلاب</a>
+                    <a href="dictionary.html" class="btn btn-outline" style="margin:0 .4rem;">فتح القاموس</a>
+                </div>
+            </section>
+
+            <!-- STUDENTS GRID -->
+            <section class="card">
+                <h2 class="card-title" style="margin-bottom:0.7rem;">اختر الطالب</h2>
+                <p class="card-description" style="margin-bottom:1rem;">
+                    اضغط على بطاقة الطالب لعرض لوحة الإنجازات الخاصة به.
+                </p>
+
+                <div id="students-grid"
+                     style="
+                        display:grid;
+                        gap:1rem;
+                        grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));
+                     ">
+                </div>
+
+                <p id="no-students-msg" style="color:#94a3b8; margin-top:1rem; display:none;">
+                    لا يوجد طلاب حتى الآن. اذهب إلى صفحة "الطلاب" لإضافة أول طالب.
+                </p>
+            </section>
+
+            <!-- DASHBOARD SECTION -->
+            <section id="dashboard-section" class="card hidden" style="margin-top:1.5rem;">
+
+                <!-- Student Header -->
+                <div style="display:flex; align-items:center; gap:1rem; margin-bottom:1rem;">
+                    <div id="dash-avatar" class="avatar" style="width:64px;height:64px;"></div>
+                    <div>
+                        <div id="dash-name" class="student-name" style="font-size:1.35rem;"></div>
+                        <div id="dash-grade" class="student-grade"></div>
+                        <div id="dash-update" class="student-update"
+                             style="margin-top:0.25rem; font-size:0.85rem; color:#94a3b8;">
+                            آخر تحديث: —
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stats-grid">
+
+                    <div class="stat-card">
+                        <div class="stat-title">إجمالي الكلمات</div>
+                        <div id="dict-count" class="stat-number">0</div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-title">كلمات اليوم</div>
+                        <div id="stat-today" class="stat-number">0</div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-title">الكلمات الضعيفة</div>
+                        <div id="stat-weak" class="stat-number">0</div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-title">آخر نتيجة اختبار</div>
+                        <div id="stat-last-score" class="stat-number">—</div>
+                        <div id="stat-last-date" class="stat-date"></div>
+                    </div>
+
+                </div>
+
+                <!-- Actions -->
+                <div style="margin-top:1.6rem; display:flex; flex-wrap:wrap; gap:0.7rem; justify-content:center;">
+                    <a id="btn-open-dic" href="#" class="btn btn-primary">إدارة مفردات الطالب</a>
+                    <a id="btn-quick" href="quiz.html?mode=fast" class="btn btn-outline">اختبار سريع</a>
+                    <a id="btn-today" href="quiz.html?mode=today" class="btn btn-outline">اختبار كلمات اليوم</a>
+                    <a id="btn-weak" href="quiz.html?mode=weak" class="btn btn-outline">اختبار الكلمات الضعيفة</a>
+                    <a id="btn-normal" href="quiz.html" class="btn btn-outline">إنشاء اختبار مخصص</a>
+                </div>
+
+            </section>
+
+        </div>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="app-footer">
+        <div class="container footer-layout">
+
+            <div class="footer-right">قاموس الطالب</div>
+
+            <div class="footer-center">
+                تصميم وتنفيذ: أبو عبدالله — جميع الحقوق محفوظة 2026
+            </div>
+
+            <div class="footer-left">
+                منصة تعليمية لمراجعة المفردات
+            </div>
+
+        </div>
+    </footer>
+
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const STORAGE_STUDENTS = "student";
+    const DICT_PREFIX = "studentDictionary_";
+    const SELECTED_KEY = "selectedStudent";
+
+    const gridEl = document.getElementById("students-grid");
+    const noStudentsMsg = document.getElementById("no-students-msg");
+    const dashSection = document.getElementById("dashboard-section");
+
+    const dashAvatar = document.getElementById("dash-avatar");
+    const dashName   = document.getElementById("dash-name");
+    const dashGrade  = document.getElementById("dash-grade");
+    const dashUpdate = document.getElementById("dash-update");
+
+    const dictCount = document.getElementById("dict-count");
+    const statToday = document.getElementById("stat-today");
+    const statWeak  = document.getElementById("stat-weak");
+    const statLastScore = document.getElementById("stat-last-score");
+    const statLastDate  = document.getElementById("stat-last-date");
+
+    /* أرقام انجليزية */
+    function enNums(str) {
+        if (!str) return str;
+        return str
+            .replace(/[٠-٩]/g, d => "0123456789"["٠١٢٣٤٥٦٧٨٩".indexOf(d)]);
+    }
+
+    /* إذا كان التاريخ ISO → صيغة 12 ساعة / إذا عربي → أعرضه كما هو */
+    function formatTime12(dateStr) {
+        if (!dateStr) return "—";
+
+        const d = new Date(dateStr);
+
+        // إذا كان عربي قديم أو صيغة غير مدعومة
+        if (isNaN(d.getTime())) {
+            return dateStr; // لا نغيّر شيء
+        }
+
+        let hours = d.getHours();
+        let minutes = d.getMinutes().toString().padStart(2, "0");
+        const ampm = hours >= 12 ? "PM" : "AM";
+
+        hours = hours % 12 || 12;
+
+        return `${hours}:${minutes} ${ampm} ${d.toLocaleDateString("en-GB")}`;
+    }
+
+    function formatLastUpdate(dt) {
+        if (!dt) return "آخر تحديث: —";
+        return "آخر تحديث: " + formatTime12(dt);
+    }
+
+    function loadStudents() {
+        try {
+            return JSON.parse(localStorage.getItem(STORAGE_STUDENTS)) || [];
+        } catch {
+            return [];
+        }
+    }
+
+    function loadDictionary(studentId) {
+        try {
+            return JSON.parse(localStorage.getItem(DICT_PREFIX + studentId)) || [];
+        } catch {
+            return [];
+        }
+    }
+
+    /* عرض الطلاب */
+    function renderStudents() {
+        const students = loadStudents();
+        gridEl.innerHTML = "";
+
+        if (!students.length) {
+            noStudentsMsg.style.display = "block";
+            dashSection.classList.add("hidden");
+            return;
+        }
+
+        noStudentsMsg.style.display = "none";
+
+        students.forEach(s => {
+            const card = document.createElement("div");
+            card.className = "student-card";
+            card.style.cursor = "pointer";
+            card.dataset.id = s.id;
+
+            const lastUpdateText =
+                s.lastUpdate ? formatTime12(s.lastUpdate) : "—";
+
+            const avatarHtml = s.avatar
+                ? `<img src="${s.avatar}" alt="${s.name}" style="width:48px;height:48px;border-radius:50%;object-fit:cover;">`
+                : `<div style="
+                        width:48px;height:48px;border-radius:50%;
+                        background:#1e3a8a;color:#e5e7eb;
+                        display:flex;align-items:center;justify-content:center;
+                        font-size:1.4rem;font-weight:700;
+                   ">${s.name ? s.name.charAt(0) : "?"}</div>`;
+
+            card.innerHTML = `
+    <div style="
+        position:absolute; top:0.4rem; left:0.6rem;
+        font-size:0.7rem; color:#9ca3af;
+        pointer-events:none; 
+        z-index:10;
+    ">
+        ${lastUpdateText === "—" ? "" : lastUpdateText}
+    </div>
+
+
+                <div style="display:flex;flex-direction:column;align-items:center;text-align:center;gap:0.5rem;">
+                    ${avatarHtml}
+                    <div style="font-size:1.05rem;font-weight:700;color:#f9fafb;">
+                        ${s.name}
+                    </div>
+                    <div style="font-size:0.9rem;color:#cbd5e1;">
+                        ${s.grade || ""}
+                    </div>
+                </div>
+            `;
+
+            card.addEventListener("click", () => openDashboard(s));
+            gridEl.appendChild(card);
+        });
+
+        const selectedId = localStorage.getItem(SELECTED_KEY);
+        if (selectedId) {
+            const st = students.find(x => x.id === selectedId);
+            if (st) openDashboard(st);
+        }
+    }
+
+    function openDashboard(student) {
+        localStorage.setItem(SELECTED_KEY, student.id);
+
+        const dic = loadDictionary(student.id);
+
+        const total = dic.length;
+        const todayISO = new Date().toISOString().slice(0,10);
+        const todayCount = dic.filter(w => (w.createdAt || "").startsWith(todayISO)).length;
+        const weakCount = dic.filter(w => (w.wrongCount || 0) > 0).length;
+
+        let scoreText = "—";
+        let dateText  = "";
+
+        if (student.lastScore !== undefined && student.lastScore !== null) {
+            scoreText = enNums(student.lastScore.toString()) + "%";
+        }
+
+        if (student.lastTestDate) {
+            dateText = formatTime12(student.lastTestDate);
+        }
+
+        dashName.textContent = student.name || "";
+        dashGrade.textContent = student.grade || "";
+        dashUpdate.textContent = formatLastUpdate(student.lastUpdate);
+
+        dictCount.textContent = enNums(total.toString());
+        statToday.textContent = enNums(todayCount.toString());
+        statWeak.textContent  = enNums(weakCount.toString());
+
+        statLastScore.textContent = scoreText;
+        statLastDate.textContent  = dateText;
+
+        document.getElementById("btn-open-dic").href =
+            "dictionary.html?studentId=" + student.id;
+
+        dashAvatar.innerHTML =
+            student.avatar
+            ? `<img src="${student.avatar}" style="width:64px;height:64px;border-radius:50%;object-fit:cover;">`
+            : `<div style="
+                    width:64px;height:64px;border-radius:50%;
+                    background:#1e3a8a;color:#fff;
+                    display:flex;align-items:center;justify-content:center;
+                    font-size:1.6rem;font-weight:700;">
+                    ${student.name ? student.name.charAt(0) : "?"}
+               </div>`;
+
+        dashSection.classList.remove("hidden");
+        dashSection.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    /* تشغيل */
+    renderStudents();
+
+    window.addEventListener("storage", renderStudents);
+
+});
+</script>
+
+</body>
+</html>

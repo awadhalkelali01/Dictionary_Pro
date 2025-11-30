@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>عن القاموس | قاموس الطالب</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet" />
+
+    <link rel="stylesheet" href="style.css" />
+<link rel="manifest" href="manifest.json">
+
+<script>
+if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+        navigator.serviceWorker.register("service-worker.js")
+            .catch(err => console.log("SW registration failed:", err));
+    });
+}
+</script>
+
+</head>
+
+<body>
+<div class="app-shell">
+
+    <!-- رأس الصفحة -->
+    <header class="app-header">
+        <div class="container header-content">
+            <div class="brand">
+                <div class="brand-mark"><span>A+</span></div>
+                <div class="brand-text">
+                    <span class="brand-title">قاموس الطالب</span>
+                    <span class="brand-subtitle-en">Student Dictionary</span>
+                </div>
+            </div>
+
+            <button class="nav-toggle" aria-label="فتح/إغلاق القائمة" aria-expanded="false">
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+            </button>
+
+            <nav class="main-nav" aria-label="القائمة الرئيسية">
+                <a href="index.html" class="nav-link">الرئيسية</a>
+                <a href="students.html" class="nav-link">الطلاب</a>
+                <a href="dictionary.html" class="nav-link">القاموس</a>
+                <a href="quiz.html" class="nav-link">الاختبارات</a>
+                <a href="about.html" class="nav-link active">عن القاموس</a>
+                <a href="help.html" class="nav-link">مساعدة</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- المحتوى -->
+    <main class="app-main">
+        <div class="container">
+
+            <header class="page-header">
+                <h1 class="page-title">عن قاموس الطالب</h1>
+                <p class="page-description">
+                    أداة تعليمية بسيطة وفعّالة تم تصميمها للطلاب ولأولياء الأمور لتعزيز مفردات اللغة الإنجليزية في المنزل.
+                </p>
+            </header>
+
+            <section class="info-section card">
+                <h2 class="card-title">فكرة القاموس</h2>
+                <p class="card-description">
+                    تم تطوير "قاموس الطالب" ليكون وسيلة سهلة وسريعة للطلاب لتجميع كلماتهم الجديدة في مكان واحد، 
+                    مع إمكانية النطق، والبحث، وإنشاء اختبارات، وحفظ نسخة احتياطية من قاموسهم الشخصي.
+                </p>
+            </section>
+
+            <section class="info-section card">
+                <h2 class="card-title">مميزات القاموس</h2>
+                <ul class="info-list">
+                    <li>إضافة كلمات جديدة مع الأمثلة والترجمة.</li>
+                    <li>ترتيب القاموس لكل طالب على حدة.</li>
+                    <li>نطق الكلمات والجمل باللهجات الإنجليزية المختلفة.</li>
+                    <li>تصنيفات للكلمات (اسم، فعل، صفة، ظرف).</li>
+                    <li>خاصية البحث السريع داخل القاموس.</li>
+                    <li>إمكانية التصدير والاستيراد (JSON / XML) للحفاظ على البيانات.</li>
+                    <li>اختبارات تدريبية لتحسين مهارة المفردات.</li>
+                </ul>
+            </section>
+
+            <section class="info-section card">
+                <h2 class="card-title">لماذا هذا القاموس؟</h2>
+                <p class="card-description">
+                    تم تصميم الواجهة لتكون بسيطة ومريحة للطلاب، مع التركيز على سهولة الاستخدام داخل المنزل. 
+                    يجمع القاموس بين الجدية والبساطة، ليمنح الطالب تجربة تعليمية ممتعة وسهلة.
+                </p>
+            </section>
+
+            <section class="info-section card">
+                <h2 class="card-title">هل القاموس مناسب للمدارس؟</h2>
+                <p class="card-description">
+                    نعم، يمكن استخدامه في المدارس، لكن التصميم الأساسي موجه للاستخدام المنزلي 
+                    بحيث يساعد الطالب على بناء حصيلة لغوية شخصية بعيدًا عن التعقيد والتقنيات الزائدة.
+                </p>
+            </section>
+
+        </div>
+    </main>
+
+    <!-- الفوتر -->
+    <footer class="app-footer">
+        <div class="container footer-content">
+            <div class="footer-main">
+                <span class="footer-title">قاموس الطالب</span>
+                <span class="footer-subtitle">أداة بسيطة وفعّالة لتنمية المفردات الإنجليزية.</span>
+            </div>
+            <div class="footer-links">
+                <a href="about.html">عن القاموس</a>
+                <a href="help.html">مساعدة</a>
+            </div>
+        </div>
+    </footer>
+
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const navToggle = document.querySelector(".nav-toggle");
+    const mainNav   = document.querySelector(".main-nav");
+
+    if (navToggle && mainNav) {
+        navToggle.addEventListener("click", function () {
+            const isOpen = mainNav.classList.toggle("nav-open");
+            navToggle.classList.toggle("nav-open", isOpen);
+            navToggle.setAttribute("aria-expanded", isOpen ? "true" : "false");
+        });
+    }
+});
+</script>
+
+</body>
+</html>

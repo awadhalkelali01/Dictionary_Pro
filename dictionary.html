@@ -1,0 +1,2009 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>قاموس الطالب | القاموس</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet" />
+
+    <link rel="stylesheet" href="style.css" />
+
+<link rel="manifest" href="manifest.json">
+
+<script>
+if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+        navigator.serviceWorker.register("service-worker.js")
+            .catch(err => console.log("SW registration failed:", err));
+    });
+}
+</script>
+
+</head>
+<body>
+<div class="app-shell">
+
+    <!-- رأس الصفحة -->
+    <header class="app-header">
+        <div class="container header-content">
+            <div class="brand">
+                <div class="brand-mark">
+                    <span>A+</span>
+                </div>
+                <div class="brand-text">
+                    <span class="brand-title">قاموس الطالب</span>
+                    <span class="brand-subtitle-en">Student Dictionary</span>
+                </div>
+            </div>
+
+            <!-- زر القائمة للجوال -->
+            <button class="nav-toggle" type="button" aria-label="فتح/إغلاق القائمة" aria-expanded="false">
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+            </button>
+
+            <!-- القائمة الرئيسية -->
+            <nav class="main-nav" aria-label="القائمة الرئيسية">
+                <a href="index.html" class="nav-link">الرئيسية</a>
+                <a href="students.html" class="nav-link">الطلاب</a>
+                <a href="dictionary.html" class="nav-link active">القاموس</a>
+                <a href="quiz.html" class="nav-link">الاختبارات</a>
+                <a href="about.html" class="nav-link">عن القاموس</a>
+                <a href="help.html" class="nav-link">مساعدة</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- المحتوى -->
+    <main class="app-main">
+        <div class="container">
+
+            <!-- عنوان الصفحة + معلومات الطالب -->
+            <header class="page-header">
+                <div>
+                    <h1 class="page-title">القاموس التفاعلي</h1>
+                    <div id="student-header" style="margin-top:0.4rem;display:flex;align-items:center;gap:0.75rem;min-height:52px;">
+                        <div id="student-avatar-wrap" style="width:48px;height:48px;border-radius:50%;overflow:hidden;flex-shrink:0;display:none;">
+                            <img id="student-avatar" src="" alt="صورة الطالب" style="width:48px;height:48px;object-fit:cover;border-radius:50%;" />
+                        </div>
+                        <div style="display:flex;flex-direction:column;gap:0.1rem;">
+                            <span id="student-name-line" style="font-size:1.05rem;font-weight:600;color:#e5e7eb;">
+                                لم يتم اختيار طالب بعد
+                            </span>
+                            <span id="student-grade-line" style="font-size:0.85rem;color:#9ca3af;">
+                                اختر الطالب من القائمة أدناه لعرض قاموسه الخاص.
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="page-header-meta">
+                    <span class="tag">عدد الكلمات: <span id="dict-count">0</span></span>
+                    <span class="tag tag-soft">قاموس منزلي لكل طالب على حدة</span>
+                </div>
+            </header>
+
+            <!-- أدوات القاموس (الطالب + التصنيف + البحث) -->
+            <section class="page-toolbar">
+                <div class="toolbar-group">
+                    <label class="toolbar-label" for="student-select">الطالب</label>
+                    <select id="student-select" class="form-control">
+                        <option value="">اختر الطالب...</option>
+                    </select>
+                </div>
+
+                <div class="toolbar-group">
+                    <label class="toolbar-label" for="category-filter">التصنيف</label>
+                    <select id="category-filter" class="form-control">
+                        <option value="">كل التصنيفات</option>
+                        <option value="noun">اسم (Noun)</option>
+                        <option value="verb">فعل (Verb)</option>
+                        <option value="adj">صفة (Adjective)</option>
+                        <option value="adv">ظرف (Adverb)</option>
+                    </select>
+                </div>
+
+                <div class="toolbar-group">
+                    <label class="toolbar-label" for="word-search">بحث</label>
+                    <input
+                        id="word-search"
+                        type="search"
+                        class="form-control"
+                        placeholder="اكتب الكلمة بالعربية أو الإنجليزية..."
+                    />
+                </div>
+            </section>
+
+            <!-- عمودان: النموذج + القائمة -->
+            <section class="page-layout-2col">
+
+                <!-- نموذج إضافة كلمة -->
+                <article class="card">
+                    <h2 class="card-title">إضافة كلمة جديدة</h2>
+                    <p class="card-description">
+                        اختر الطالب أولاً، ثم أدخل الكلمة ومعناها وجملة مثال. يتم ضبط الكابيتال والنقطة تلقائيًا.
+                    </p>
+
+                    <form id="word-form" class="form-grid">
+                        <div class="form-field">
+                            <label class="form-label" for="word-arabic">الكلمة (العربية) *</label>
+                            <input
+                                type="text"
+                                id="word-arabic"
+                                class="form-control"
+                                required
+                                placeholder="مثال: مدرسة"
+                                data-error-target="error-word-arabic"
+                            />
+                            <div class="field-error" id="error-word-arabic"></div>
+                        </div>
+
+                        <div class="form-field">
+                            <label class="form-label" for="word-english">الكلمة (الإنجليزية) *</label>
+                            <input
+                                type="text"
+                                id="word-english"
+                                class="form-control"
+                                required
+                                placeholder="مثال: School"
+                                data-error-target="error-word-english"
+                            />
+                            <div class="field-error" id="error-word-english"></div>
+                        </div>
+
+                        <div class="form-field">
+                            <label class="form-label" for="word-category">التصنيف *</label>
+                            <select id="word-category" class="form-control" required>
+                                <option value="">اختر التصنيف...</option>
+                                <option value="noun">اسم (Noun)</option>
+                                <option value="verb">فعل (Verb)</option>
+                                <option value="adj">صفة (Adjective)</option>
+                                <option value="adv">ظرف (Adverb)</option>
+                            </select>
+                        </div>
+
+                        <div class="form-field">
+                            <label class="form-label" for="word-example-en">الجملة (إنجليزي)</label>
+                            <input
+                                type="text"
+                                id="word-example-en"
+                                class="form-control"
+                                placeholder="مثال: I go to school every day"
+                                data-error-target="error-word-example-en"
+                            />
+                            <div class="field-error" id="error-word-example-en"></div>
+                        </div>
+
+                        <div class="form-field">
+                            <label class="form-label" for="word-example-ar">ترجمة الجملة (عربي)</label>
+                            <input
+                                type="text"
+                                id="word-example-ar"
+                                class="form-control"
+                                placeholder="مثال: أذهب إلى المدرسة كل يوم"
+                                data-error-target="error-word-example-ar"
+                            />
+                            <div class="field-error" id="error-word-example-ar"></div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">حفظ الكلمة</button>
+                            <button type="reset" class="btn btn-outline">مسح</button>
+                        </div>
+
+        <p class="form-hint" id="dict-form-hint">
+            اختر الطالب أولاً من أعلى الصفحة. يتم حفظ الكلمات تلقائيًا لكل طالب على هذا الجهاز مع إمكانية التصدير والاستيراد.
+        </p>
+    </form>
+
+    <!-- بطاقة إحصاءات القاموس -->
+    <section id="dict-stats" class="dict-stats-card">
+        <h3 class="dict-stats-title">إحصاءات القاموس</h3>
+        <p class="dict-stats-subtitle">
+            توزيع الكلمات حسب النوع للطالب المختار.
+        </p>
+
+        <div class="dict-stats-grid">
+            <!-- إجمالي الكلمات -->
+            <div class="stat-box">
+                <div class="stat-label">إجمالي الكلمات</div>
+                <div class="stat-value" id="stat-total">0</div>
+            </div>
+
+            <!-- الأسماء -->
+            <div class="stat-box">
+                <div class="stat-label">الأسماء (Noun)</div>
+                <div class="stat-value-row">
+                    <span class="stat-value" id="stat-noun">0</span>
+                    <span class="stat-percent" id="stat-noun-perc">0%</span>
+                </div>
+            </div>
+
+            <!-- الأفعال -->
+            <div class="stat-box">
+                <div class="stat-label">الأفعال (Verb)</div>
+                <div class="stat-value-row">
+                    <span class="stat-value" id="stat-verb">0</span>
+                    <span class="stat-percent" id="stat-verb-perc">0%</span>
+                </div>
+            </div>
+
+            <!-- الصفات -->
+            <div class="stat-box">
+                <div class="stat-label">الصفات (Adj)</div>
+                <div class="stat-value-row">
+                    <span class="stat-value" id="stat-adj">0</span>
+                    <span class="stat-percent" id="stat-adj-perc">0%</span>
+                </div>
+            </div>
+
+            <!-- الظروف -->
+            <div class="stat-box">
+                <div class="stat-label">الظروف (Adv)</div>
+                <div class="stat-value-row">
+                    <span class="stat-value" id="stat-adv">0</span>
+                    <span class="stat-percent" id="stat-adv-perc">0%</span>
+                </div>
+            </div>
+	   <!-- أحدث كلمة -->
+	       <div class="stat-box">
+     	       <div class="stat-label">أحدث إضافة</div>
+   	       <div class="stat-latest" id="stat-latest">
+	        لا توجد كلمات بعد
+	       </div>
+	   </div>
+        </div>
+    </section>
+</article>
+
+
+                <!-- قائمة الكلمات + إدارة البيانات -->
+                <article class="card">
+                    <div class="table-header">
+                        <div>
+                            <h2 class="card-title">قائمة الكلمات</h2>
+                            <p class="card-description">
+                                الكلمات الخاصة بالطالب المختار فقط. يمكنك فتح بطاقة التفاصيل للنطق والتعديل والاطلاع على الأمثلة.
+                            </p>
+                        </div>
+                    </div>
+
+			<div class="table-wrapper dict-table-wrapper dict-scroll">
+
+  			  <table class="data-table" aria-label="قائمة الكلمات">
+<thead>
+<tr>
+    <th class="sortable" data-key="ar">العربية</th>
+    <th class="sortable" data-key="en">الإنجليزية</th>
+    <th class="sortable" data-key="cat">التصنيف</th>
+    <th class="sortable" data-key="senEn">مثال (إنجليزي)</th>
+    <th style="text-align:center;">
+    <button id="reset-sort-btn" class="reset-sort-btn" title="إعادة الترتيب الافتراضي">⟲</button>
+</th>
+</tr>
+</thead>
+
+                            <tbody id="dict-body">
+                            <!-- يتم ملؤها من التخزين حسب الطالب -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- الترقيم -->
+                    <div class="table-pagination" id="dict-pagination"></div>
+
+                    <!-- إدارة البيانات (تصدير / استيراد / حذف الكل) -->
+                    <section class="data-tools" aria-label="إدارة بيانات القاموس">
+                        <h3 class="data-tools-title">إدارة بيانات القاموس للطالب الحالي</h3>
+                        <p class="data-tools-text">
+                            يمكنك حفظ كلمات الطالب كملف JSON أو XML، أو استيراد ملف كلمات جاهز. تتم الإضافة فقط للكلمات الجديدة.
+                        </p>
+                        <div class="data-tools-actions">
+                            <button type="button" class="btn btn-outline data-btn" id="export-json-btn">
+                                تصدير القاموس JSON
+                            </button>
+                            <button type="button" class="btn btn-outline data-btn" id="export-xml-btn">
+                                تصدير القاموس XML
+                            </button>
+                            <label class="btn btn-primary data-btn">
+                                استيراد JSON / XML
+                                <input
+                                    type="file"
+                                    id="import-file"
+                                    accept=".json,.xml"
+                                    style="display: none;"
+                                />
+                            </label>
+                        </div>
+                        <div style="margin-top:0.75rem;">
+                            <button
+                                type="button"
+                                class="btn btn-outline data-btn"
+                                id="clear-all-btn"
+                                style="border-color:#b91c1c;color:#fecaca;"
+                            >
+                                🗑 حذف جميع كلمات الطالب
+                            </button>
+                        </div>
+                        <p class="data-tools-result" id="import-result"></p>
+                    </section>
+
+                    <p class="table-hint">
+                        عند الاستيراد، يتم تجاهل الكلمات الموجودة مسبقًا (حسب الكلمة الإنجليزية) وإضافة الكلمات الجديدة فقط.
+                    </p>
+                </article>
+            </section>
+        </div>
+    </main>
+
+    <!-- الفوتر -->
+    <footer class="app-footer">
+        <div class="container footer-content">
+            <div class="footer-main">
+                <span class="footer-title">قاموس الطالب</span>
+                <span class="footer-subtitle">قاموس منزلي بسيط لكل طالب مع نطق ونسخ احتياطي.</span>
+            </div>
+            <div class="footer-links">
+                <a href="about.html">عن القاموس</a>
+                <a href="help.html">مساعدة</a>
+            </div>
+        </div>
+    </footer>
+</div>
+
+<!-- المودال (بطاقة الكلمة) -->
+<div class="word-modal-backdrop" id="word-modal" aria-hidden="true">
+    <div class="word-modal" role="dialog" aria-modal="true" aria-labelledby="modal-word-en">
+
+
+        <div class="word-modal-header">
+            <div class="word-main">
+                <div class="word-en-row">
+                    <span class="word-en-text" id="modal-word-en" dir="ltr">School</span>
+                    <input
+                        type="text"
+                        class="form-control modal-input"
+                        id="modal-word-en-input"
+                        dir="ltr"
+                        data-error-target="error-modal-word-en"
+                    />
+                    <button
+                        type="button"
+                        class="icon-btn"
+                        id="speak-word-btn"
+                        aria-label="نطق الكلمة بالإنجليزية"
+                    >
+                        🔊
+                    </button>
+                </div>
+                <div class="field-error" id="error-modal-word-en"></div>
+
+                <div class="word-ar-wrap">
+                    <span class="word-ar-text" id="modal-word-ar">مدرسة</span>
+                    <input
+                        type="text"
+                        class="form-control modal-input"
+                        id="modal-word-ar-input"
+                        data-error-target="error-modal-word-ar"
+                    />
+                </div>
+                <div class="field-error" id="error-modal-word-ar"></div>
+
+                <div class="word-cat-wrap">
+                    <span class="word-cat-text" id="modal-word-cat">اسم (Noun)</span>
+                    <select id="modal-word-cat-input" class="form-control modal-input">
+                        <option value="noun">اسم (Noun)</option>
+                        <option value="verb">فعل (Verb)</option>
+                        <option value="adj">صفة (Adjective)</option>
+                        <option value="adv">ظرف (Adverb)</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="word-modal-body">
+            <div class="word-block">
+                <div class="word-block-label">الجملة الإنجليزية</div>
+                <div class="word-block-line">
+                    <p id="modal-sentence-en" dir="ltr">I go to school every day.</p>
+                    <input
+                        type="text"
+                        class="form-control modal-input"
+                        id="modal-sentence-en-input"
+                        dir="ltr"
+                        data-error-target="error-modal-sentence-en"
+                    />
+                    <button
+                        type="button"
+                        class="icon-btn"
+                        id="speak-sentence-btn"
+                        aria-label="نطق الجملة بالإنجليزية"
+                    >
+                        🔊
+                    </button>
+                </div>
+                <div class="field-error" id="error-modal-sentence-en"></div>
+            </div>
+
+            <div class="word-block">
+                <div class="word-block-label">الترجمة العربية للجملة</div>
+                <p id="modal-sentence-ar">أذهب إلى المدرسة كل يوم.</p>
+                <input
+                    type="text"
+                    class="form-control modal-input"
+                    id="modal-sentence-ar-input"
+                    data-error-target="error-modal-sentence-ar"
+                />
+                <div class="field-error" id="error-modal-sentence-ar"></div>
+            </div>
+
+            <!-- إعدادات الصوت -->
+            <div class="audio-card">
+                <div class="audio-card-title">إعدادات الصوت</div>
+                <div class="audio-card-row">
+                    <label class="audio-label" for="voice-select">اللهجة (الصوت):</label>
+                    <select id="voice-select" class="form-control audio-select">
+                        <option value="">اختيار تلقائي (أفضل صوت إنجليزي)</option>
+                    </select>
+                </div>
+                <div class="audio-card-row">
+                    <span class="audio-label">سرعة النطق:</span>
+                    <div class="audio-rate-control">
+                        <button type="button" class="audio-rate-btn" id="rate-down">-</button>
+                        <span class="audio-rate-value" id="rate-value">0.95</span>
+                        <button type="button" class="audio-rate-btn" id="rate-up">+</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="word-modal-actions">
+            <!-- وضع العرض -->
+            <div id="modal-view-actions" style="display:flex;gap:0.5rem;justify-content:flex-end;flex-wrap:wrap;">
+                <button type="button" class="btn btn-outline" id="modal-edit-btn">تعديل</button>
+                <button
+                    type="button"
+                    class="btn btn-outline"
+                    id="modal-delete-btn"
+                    style="border-color:#b91c1c;color:#fecaca;"
+                >
+                    🗑 حذف الكلمة
+                </button>
+                <button type="button" class="btn btn-outline" id="modal-close-btn2">إغلاق</button>
+            </div>
+
+            <!-- وضع التعديل -->
+            <div class="word-modal-edit-actions" id="modal-edit-actions" style="display:none;gap:0.5rem;justify-content:flex-end;flex-wrap:wrap;">
+                <button type="button" class="btn btn-primary" id="modal-save-btn">حفظ التعديل</button>
+                <button type="button" class="btn btn-outline" id="modal-cancel-btn">إلغاء التعديل</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- مودال تأكيد عام للحذف -->
+<div
+    id="confirm-backdrop"
+    aria-hidden="true"
+    style="
+        position:fixed;
+        inset:0;
+        background:rgba(0,0,0,0.45);
+        display:none;
+        align-items:center;
+        justify-content:center;
+        z-index:1800;
+    "
+>
+    <div
+        style="
+            background:#111827;
+            border-radius:1rem;
+            padding:1.5rem;
+            max-width:360px;
+            width:90%;
+            box-shadow:0 25px 50px rgba(0,0,0,0.7);
+            border:1px solid #374151;
+        "
+    >
+        <h2 style="margin:0 0 0.75rem;font-size:1rem;color:#f9fafb;">تأكيد الحذف</h2>
+        <p
+            id="confirm-message"
+            style="margin:0 0 1.25rem;font-size:0.9rem;color:#d1d5db;line-height:1.6;"
+        >
+            سيتم حذف هذه الكلمة من قاموس الطالب. هل ترغب بالمتابعة؟
+        </p>
+        <div style="display:flex;justify-content:flex-end;gap:0.5rem;">
+            <button type="button" class="btn btn-outline" id="confirm-no">إلغاء</button>
+            <button
+                type="button"
+                class="btn btn-primary"
+                id="confirm-yes"
+                style="background:#b91c1c;border-color:#b91c1c;"
+            >
+                نعم، احذف
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Toast container -->
+<div
+    id="toast-container"
+    style="
+        position:fixed;
+        bottom:1rem;
+        right:1rem;
+        z-index:2000;
+        display:flex;
+        flex-direction:column;
+        gap:0.5rem;
+        pointer-events:none;
+    "
+></div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    // مفاتيح التخزين
+    const STORAGE_KEY_STUDENTS   = "student";
+    const DICT_KEY_PREFIX        = "studentDictionary_";
+    const STORAGE_KEY_VOICE      = "studentDictionaryVoice_v1";
+    const STORAGE_KEY_RATE       = "studentDictionaryRate_v1";
+    const TEST_KEY_PREFIX        = "studentTests_";
+    const PAGE_SIZE              = 20;
+
+    // قائمة الجوال
+    const navToggle = document.querySelector(".nav-toggle");
+    const mainNav   = document.querySelector(".main-nav");
+    if (navToggle && mainNav) {
+        navToggle.addEventListener("click", function () {
+            const isOpen = mainNav.classList.toggle("nav-open");
+            navToggle.classList.toggle("nav-open", isOpen);
+            navToggle.setAttribute("aria-expanded", isOpen ? "true" : "false");
+        });
+    }
+
+    // عناصر الصفحة
+    const studentSelect      = document.getElementById("student-select");
+    const studentNameLine    = document.getElementById("student-name-line");
+    const studentGradeLine   = document.getElementById("student-grade-line");
+    const studentAvatarWrap  = document.getElementById("student-avatar-wrap");
+    const studentAvatarImg   = document.getElementById("student-avatar");
+
+    const dictFormHint       = document.getElementById("dict-form-hint");
+
+    const form               = document.getElementById("word-form");
+    const tbody              = document.getElementById("dict-body");
+    const count              = document.getElementById("dict-count");
+    const searchInput        = document.getElementById("word-search");
+    const categoryFilter     = document.getElementById("category-filter");
+    const paginationContainer= document.getElementById("dict-pagination");
+    const dictTableWrapper  = document.querySelector(".dict-table-wrapper");
+
+    // إدارة البيانات
+    const exportJsonBtn      = document.getElementById("export-json-btn");
+    const exportXmlBtn       = document.getElementById("export-xml-btn");
+    const importFileInput    = document.getElementById("import-file");
+    const importResult       = document.getElementById("import-result");
+    const clearAllBtn        = document.getElementById("clear-all-btn");
+
+    // المودال
+    const modalBackdrop      = document.getElementById("word-modal");
+    const wordModal          = document.querySelector(".word-modal");
+    const modalCloseBtn      = document.getElementById("word-modal-close");
+
+    const modalWordEn        = document.getElementById("modal-word-en");
+    const modalWordEnInput   = document.getElementById("modal-word-en-input");
+    const modalWordAr        = document.getElementById("modal-word-ar");
+    const modalWordArInput   = document.getElementById("modal-word-ar-input");
+    const modalWordCat       = document.getElementById("modal-word-cat");
+    const modalWordCatInput  = document.getElementById("modal-word-cat-input");
+    const modalSentenceEn    = document.getElementById("modal-sentence-en");
+    const modalSentenceEnInput = document.getElementById("modal-sentence-en-input");
+    const modalSentenceAr    = document.getElementById("modal-sentence-ar");
+    const modalSentenceArInput = document.getElementById("modal-sentence-ar-input");
+
+    const speakWordBtn       = document.getElementById("speak-word-btn");
+    const speakSentenceBtn   = document.getElementById("speak-sentence-btn");
+
+    const modalViewActions   = document.getElementById("modal-view-actions");
+    const modalEditActions   = document.getElementById("modal-edit-actions");
+    const modalEditBtn       = document.getElementById("modal-edit-btn");
+    const modalSaveBtn       = document.getElementById("modal-save-btn");
+    const modalCancelBtn     = document.getElementById("modal-cancel-btn");
+    const modalDeleteBtn     = document.getElementById("modal-delete-btn");
+    const modalCloseBtn2     = document.getElementById("modal-close-btn2");
+
+    // إعدادات الصوت
+    const voiceSelect        = document.getElementById("voice-select");
+    const rateDownBtn        = document.getElementById("rate-down");
+    const rateUpBtn          = document.getElementById("rate-up");
+    const rateValueSpan      = document.getElementById("rate-value");
+
+    // حقول النموذج الأساسي
+    const arInput            = document.getElementById("word-arabic");
+    const enInput            = document.getElementById("word-english");
+    const catSelect          = document.getElementById("word-category");
+    const exEnInput          = document.getElementById("word-example-en");
+    const exArInput          = document.getElementById("word-example-ar");
+
+    // Toast & Confirm
+    const toastContainer     = document.getElementById("toast-container");
+    const confirmBackdrop    = document.getElementById("confirm-backdrop");
+    const confirmMessageEl   = document.getElementById("confirm-message");
+    const confirmYesBtn      = document.getElementById("confirm-yes");
+    const confirmNoBtn       = document.getElementById("confirm-no");
+    let confirmHandler       = null;
+
+    // متغيرات عامة
+    let students             = [];
+    let currentStudent       = null; // {id, name, grade, avatar}
+    let allRows              = [];
+    let currentPage          = 1;
+    let totalPages           = 1;
+    let currentRow           = null;
+    let currentWordEn        = "";
+    let currentSentenceEn    = "";
+
+    // أصوات النطق
+    let voices               = [];
+    let selectedVoiceName    = "";
+    let speechRate           = 0.95;
+
+    // ===== دوال مساعدة عامة =====
+    function setError(input, message) {
+        if (!input) return;
+        const errorId = input.dataset.errorTarget;
+        const errorEl = errorId ? document.getElementById(errorId) : null;
+        if (errorEl) errorEl.textContent = message || "";
+        if (message) {
+            input.classList.add("input-error");
+        } else {
+            input.classList.remove("input-error");
+        }
+    }
+
+    function clearErrors(inputs) {
+        if (!inputs) return;
+        inputs.forEach(i => setError(i, ""));
+    }
+
+    function validateEnglish(input, options) {
+        if (!input) return true;
+        const value = (input.value || "").trim();
+        const required = options && options.required;
+
+        if (required && !value) {
+            setError(input, "هذا الحقل مطلوب (إنجليزي).");
+            return false;
+        }
+        if (!value) {
+            setError(input, "");
+            return true;
+        }
+
+        const hasArabic = /[\u0600-\u06FF]/.test(value);
+        if (hasArabic) {
+            setError(input, "الرجاء استخدام حروف إنجليزية فقط في هذا الحقل.");
+            return false;
+        }
+
+        const hasLatin = /[A-Za-z]/.test(value);
+        if (!hasLatin) {
+            setError(input, "الرجاء إدخال نص إنجليزي صحيح.");
+            return false;
+        }
+
+        setError(input, "");
+        return true;
+    }
+
+    function validateArabic(input, options) {
+        if (!input) return true;
+        const value = (input.value || "").trim();
+        const required = options && options.required;
+
+        if (required && !value) {
+            setError(input, "هذا الحقل مطلوب (عربي).");
+            return false;
+        }
+        if (!value) {
+            setError(input, "");
+            return true;
+        }
+
+        const hasLatin = /[A-Za-z]/.test(value);
+        if (hasLatin) {
+            setError(input, "الرجاء استخدام حروف عربية فقط في هذا الحقل.");
+            return false;
+        }
+
+        const hasArabic = /[\u0600-\u06FF]/.test(value);
+        if (!hasArabic) {
+            setError(input, "الرجاء إدخال نص عربي صحيح.");
+            return false;
+        }
+
+        setError(input, "");
+        return true;
+    }
+
+    function normalizeEnglishWord(text) {
+        const t = text.trim();
+        if (!t) return "";
+        return t.charAt(0).toUpperCase() + t.slice(1).toLowerCase();
+    }
+
+    function normalizeEnglishSentence(text) {
+        let t = text.trim();
+        if (!t) return "";
+        t = t.charAt(0).toUpperCase() + t.slice(1);
+        if (!/[.!?]$/.test(t)) {
+            t += ".";
+        }
+        return t;
+    }
+
+    function getCategoryLabel(key) {
+        switch (key) {
+            case "noun": return "اسم (Noun)";
+            case "verb": return "فعل (Verb)";
+            case "adj":  return "صفة (Adjective)";
+            case "adv":  return "ظرف (Adverb)";
+            default:     return "";
+        }
+    }
+
+    function getCategoryShortLabel(key) {
+        switch (key) {
+            case "noun": return "اسم";
+            case "verb": return "فعل";
+            case "adj":  return "صفة";
+            case "adv":  return "ظرف";
+            default:     return "";
+        }
+    }
+
+    function updateCount() {
+        if (!tbody || !count) return;
+        count.textContent = allRows.length;
+    }
+
+    // تفعيل/إلغاء وضع الـ Scroll بحسب عدد الكلمات
+    function updateTableScrollMode() {
+        if (!dictTableWrapper) return;
+
+        if (allRows.length > 15) {
+            dictTableWrapper.classList.add("dict-scroll");
+        } else {
+            dictTableWrapper.classList.remove("dict-scroll");
+        }
+    }
+function timeAgo(dateStr) {
+    if (!dateStr) return "-";
+
+    const d = new Date(dateStr);
+    const now = new Date();
+    const diff = (now - d) / 1000; // جزء بالثواني
+
+    if (diff < 60) return "منذ لحظات";
+    if (diff < 3600) return `قبل ${Math.floor(diff / 60)} دقيقة`;
+    if (diff < 86400) return `قبل ${Math.floor(diff / 3600)} ساعة`;
+    if (diff < 604800) return `قبل ${Math.floor(diff / 86400)} يوم`;
+
+    return d.toLocaleDateString("ar");
+}
+
+    // حساب الإحصاءات وتحديث البطاقة
+    function updateStatsCard() {
+        // إذا لم توجد عناصر الإحصاءات (لأي سبب) نخرج بهدوء
+        const totalEl = document.getElementById("stat-total");
+        if (!totalEl) return;
+
+        const nounEl       = document.getElementById("stat-noun");
+        const verbEl       = document.getElementById("stat-verb");
+        const adjEl        = document.getElementById("stat-adj");
+        const advEl        = document.getElementById("stat-adv");
+        const nounPercEl   = document.getElementById("stat-noun-perc");
+        const verbPercEl   = document.getElementById("stat-verb-perc");
+        const adjPercEl    = document.getElementById("stat-adj-perc");
+        const advPercEl    = document.getElementById("stat-adv-perc");
+        const latestEl = document.getElementById("stat-latest");
+
+        let total = allRows.length;
+        let noun = 0, verb = 0, adj = 0, adv = 0;
+
+        allRows.forEach(row => {
+            switch (row.dataset.cat) {
+                case "noun": noun++; break;
+                case "verb": verb++; break;
+                case "adj":  adj++;  break;
+                case "adv":  adv++;  break;
+            }
+        });
+
+        // أرقام
+        totalEl.textContent = total;
+        nounEl.textContent  = noun;
+        verbEl.textContent  = verb;
+        adjEl.textContent   = adj;
+        advEl.textContent   = adv;
+
+        // نسب مئوية
+        const getPerc = (count) =>
+            total === 0 ? "0%" : Math.round((count / total) * 100) + "%";
+
+        nounPercEl.textContent = getPerc(noun);
+        verbPercEl.textContent = getPerc(verb);
+        adjPercEl.textContent  = getPerc(adj);
+        advPercEl.textContent  = getPerc(adv);
+    // أحدث كلمة مضافة
+    if (latestEl) {
+        if (allRows.length === 0) {
+            latestEl.textContent = "لا توجد كلمات بعد";
+        } else {
+            const sorted = [...allRows].sort((a, b) =>
+                (b.dataset.createdAt || "").localeCompare(a.dataset.createdAt || "")
+            );
+
+            const last = sorted[0];
+            const ar = last.dataset.ar || "-";
+            const en = last.dataset.en || "-";
+            const t  = timeAgo(last.dataset.createdAt);
+
+            latestEl.innerHTML = `${en} — ${ar}<br><span style="font-size:0.8rem;color:#9ca3af">${t}</span>`;
+        }
+    }
+}
+
+    function rebuildRowsCache() {
+        if (!tbody) return;
+        allRows = Array.from(tbody.querySelectorAll("tr"));
+        updateCount();
+        updateStatsCard();
+        updateTableScrollMode(); // تحديث وضع الـ Scroll كلما تغيرت الصفوف
+    }
+
+
+    function applyFiltersAndPagination(resetPage) {
+        if (!tbody) return;
+
+        const searchValue = searchInput ? (searchInput.value || "").trim().toLowerCase() : "";
+        const catValue    = categoryFilter ? (categoryFilter.value || "") : "";
+
+        const filtered = allRows.filter(row => {
+            const ar  = (row.dataset.ar  || "").toLowerCase();
+            const en  = (row.dataset.en  || "").toLowerCase();
+            const cat = (row.dataset.cat || "");
+
+            let matchSearch = true;
+            if (searchValue) {
+                matchSearch = ar.includes(searchValue) || en.includes(searchValue);
+            }
+
+            let matchCat = true;
+            if (catValue) {
+                matchCat = cat === catValue;
+            }
+
+            return matchSearch && matchCat;
+        });
+
+        const total = filtered.length;
+        totalPages  = Math.max(1, Math.ceil(total / PAGE_SIZE));
+
+        if (resetPage || currentPage > totalPages) {
+            currentPage = 1;
+        }
+
+        allRows.forEach(row => row.style.display = "none");
+
+        const start = (currentPage - 1) * PAGE_SIZE;
+        const end   = start + PAGE_SIZE;
+        filtered.slice(start, end).forEach(row => row.style.display = "");
+
+        renderPagination();
+    }
+
+    function renderPagination() {
+        if (!paginationContainer) return;
+        if (totalPages <= 1) {
+            paginationContainer.innerHTML = "";
+            return;
+        }
+
+        let html = "";
+        html += `<button class="page-btn" data-page="prev" ${currentPage === 1 ? "disabled" : ""}>‹</button>`;
+
+        for (let p = 1; p <= totalPages; p++) {
+            html += `<button class="page-btn${p === currentPage ? " is-active" : ""}" data-page="${p}">${p}</button>`;
+        }
+
+        html += `<button class="page-btn" data-page="next" ${currentPage === totalPages ? "disabled" : ""}>›</button>`;
+
+        paginationContainer.innerHTML = html;
+    }
+
+    function createRowFromData(item) {
+        const tr = document.createElement("tr");
+        tr.dataset.ar    = item.ar || "";
+        tr.dataset.en    = item.en || "";
+        tr.dataset.cat   = item.category || "";
+        tr.dataset.senEn = item.sentence_en || "";
+        tr.dataset.senAr = item.sentence_ar || "";
+        tr.dataset.createdAt = item.createdAt || new Date().toISOString();
+
+        tr.innerHTML = `
+            <td>${item.ar || ""}</td>
+            <td dir="ltr">${item.en || ""}</td>
+            <td>${getCategoryShortLabel(item.category || "")}</td>
+            <td dir="ltr" class="example-preview">${item.sentence_en || "-"}</td>
+            <td>
+                <button type="button" class="btn-table-action view-word">التفاصيل</button>
+            </td>
+        `;
+        return tr;
+    }
+
+    function serializeRows() {
+        return allRows.map(row => {
+    return {
+        ar:          row.dataset.ar || "",
+        en:          row.dataset.en || "",
+        category:    row.dataset.cat || "",
+        sentence_en: row.dataset.senEn || "",
+        sentence_ar: row.dataset.senAr || "",
+        createdAt:   row.dataset.createdAt || new Date().toISOString()
+    };
+});
+
+    }
+
+    function getCurrentDictKey() {
+        if (!currentStudent) return null;
+        return DICT_KEY_PREFIX + currentStudent.id;
+    }
+
+    function formatUpdateString() {
+        try {
+            // تنسيق بسيط: تاريخ + وقت قصير بالعربي
+            return new Date().toLocaleString("ar", {
+                year: "numeric",
+                month: "2-digit",
+                day: "2-digit",
+                hour: "2-digit",
+                minute: "2-digit"
+            });
+        } catch (e) {
+            // في حال المتصفح لا يدعم الخيارات
+            return new Date().toLocaleString("ar");
+        }
+    }
+
+    function touchStudentLastUpdate() {
+        // لا يمكن التحديث بدون طالب حالي
+        if (!currentStudent) return;
+
+        try {
+            const raw = localStorage.getItem(STORAGE_KEY_STUDENTS);
+            if (!raw) return;
+
+            const list = JSON.parse(raw) || [];
+            const idx = list.findIndex(s => s.id === currentStudent.id);
+            if (idx === -1) return;
+
+            // تحديث حقل lastUpdate للطالب
+            list[idx].lastUpdate = formatUpdateString();
+
+            localStorage.setItem(STORAGE_KEY_STUDENTS, JSON.stringify(list));
+        } catch (err) {
+            console.error("Error updating student lastUpdate:", err);
+        }
+    }
+
+    function saveDictionaryToStorage() {
+        const key = getCurrentDictKey();
+        if (!key) return;
+        try {
+            const data = serializeRows();
+            localStorage.setItem(key, JSON.stringify(data));
+
+            // كل عملية حفظ للقاموس تعتبر "آخر تحديث"
+            touchStudentLastUpdate();
+        } catch (err) {
+            console.error("Error saving dictionary:", err);
+        }
+    }
+
+
+function loadDictionaryForCurrentStudent() {
+    if (!tbody) return;
+    tbody.innerHTML = "";
+    allRows = [];
+    updateCount();
+
+    if (!currentStudent) {
+        // إلغاء أي فرز
+        currentSortKey = null;
+        currentSortDir = null;
+
+        applyFiltersAndPagination(true);
+        return;
+    }
+
+    const key = getCurrentDictKey();
+    let data = [];
+
+    try {
+        const raw = localStorage.getItem(key);
+        if (!raw) {
+            // أول مرة لهذا الطالب: أمثلة بسيطة
+            data = [
+                {
+                    ar: "مدرسة",
+                    en: "School",
+                    category: "noun",
+                    sentence_en: "I go to school every day.",
+                    sentence_ar: "أذهب إلى المدرسة كل يوم."
+                },
+                {
+                    ar: "طالب",
+                    en: "Student",
+                    category: "noun",
+                    sentence_en: "The student is smart.",
+                    sentence_ar: "الطالب ذكي."
+                }
+            ];
+        } else {
+            data = JSON.parse(raw) || [];
+	   data = data.map(item => ({
+    ...item,
+    createdAt: item.createdAt || new Date().toISOString()
+}));
+
+data.forEach(item => {
+    const tr = createRowFromData(item);
+    tbody.appendChild(tr);
+});
+
+
+        }
+    } catch (err) {
+        console.error("Error loading dictionary:", err);
+        data = [];
+    }
+
+    rebuildRowsCache();
+    applyFiltersAndPagination(true);
+
+    // --------------------------
+    // 1) إلغاء أي فرز سابق
+    // --------------------------
+    currentSortKey = null;
+    currentSortDir = null;
+
+    // --------------------------
+    // 2) إزالة أي order مكتسب من الفرز السابق
+    // --------------------------
+    tbody.querySelectorAll("tr").forEach(row => {
+        row.style.order = "";
+    });
+
+    // --------------------------
+    // 3) إزالة تمييز الرؤوس والسهم
+    // --------------------------
+    document.querySelectorAll(".sortable").forEach(th => {
+        th.classList.remove("sorted-asc", "sorted-desc");
+        th.removeAttribute("data-sort");
+    });
+}
+
+
+    // ===== Toast Notifications =====
+    function showToast(message, type) {
+        if (!toastContainer) return;
+        const toast = document.createElement("div");
+        toast.textContent = message;
+        toast.style.minWidth = "220px";
+        toast.style.maxWidth = "360px";
+        toast.style.padding = "0.6rem 0.9rem";
+        toast.style.borderRadius = "0.75rem";
+        toast.style.fontSize = "0.85rem";
+        toast.style.boxShadow = "0 10px 25px rgba(0,0,0,0.45)";
+        toast.style.display = "flex";
+        toast.style.alignItems = "center";
+        toast.style.justifyContent = "space-between";
+        toast.style.gap = "0.75rem";
+        toast.style.color = "#f9fafb";
+        toast.style.direction = "rtl";
+        toast.style.pointerEvents = "auto";
+        toast.style.opacity = "0";
+        toast.style.transform = "translateY(10px)";
+        toast.style.transition = "opacity 0.2s ease, transform 0.2s ease";
+
+        let bg = "#374151";
+        if (type === "success") bg = "#166534";
+        else if (type === "error") bg = "#7f1d1d";
+        else if (type === "info") bg = "#1f2937";
+        toast.style.background = bg;
+
+        const closeBtn = document.createElement("button");
+        closeBtn.textContent = "×";
+        closeBtn.style.border = "none";
+        closeBtn.style.background = "transparent";
+        closeBtn.style.color = "#9ca3af";
+        closeBtn.style.cursor = "pointer";
+        closeBtn.style.fontSize = "1rem";
+        closeBtn.style.padding = "0";
+        closeBtn.style.margin = "0";
+        closeBtn.addEventListener("click", () => {
+            toast.style.opacity = "0";
+            toast.style.transform = "translateY(10px)";
+            setTimeout(() => {
+                toastContainer.removeChild(toast);
+            }, 200);
+        });
+
+        toast.appendChild(closeBtn);
+        toastContainer.appendChild(toast);
+
+        // animate in
+        requestAnimationFrame(() => {
+            toast.style.opacity = "1";
+            toast.style.transform = "translateY(0)";
+        });
+
+        // auto hide
+        setTimeout(() => {
+            if (!toast.isConnected) return;
+            toast.style.opacity = "0";
+            toast.style.transform = "translateY(10px)";
+            setTimeout(() => {
+                if (toast.isConnected) toastContainer.removeChild(toast);
+            }, 200);
+        }, 2800);
+    }
+
+    // ===== Confirm Modal =====
+    function openConfirm(message, onConfirm) {
+        if (!confirmBackdrop || !confirmMessageEl) return;
+        confirmMessageEl.textContent = message;
+        confirmHandler = typeof onConfirm === "function" ? onConfirm : null;
+        confirmBackdrop.style.display = "flex";
+        confirmBackdrop.setAttribute("aria-hidden", "false");
+    }
+
+    function closeConfirm() {
+        if (!confirmBackdrop) return;
+        confirmBackdrop.style.display = "none";
+        confirmBackdrop.setAttribute("aria-hidden", "true");
+        confirmHandler = null;
+    }
+
+    if (confirmYesBtn) {
+        confirmYesBtn.addEventListener("click", function () {
+            if (confirmHandler) {
+                const fn = confirmHandler;
+                confirmHandler = null;
+                fn();
+            }
+            closeConfirm();
+        });
+    }
+
+    if (confirmNoBtn) {
+        confirmNoBtn.addEventListener("click", function () {
+            closeConfirm();
+        });
+    }
+
+    if (confirmBackdrop) {
+        confirmBackdrop.addEventListener("click", function (e) {
+            if (e.target === confirmBackdrop) {
+                closeConfirm();
+            }
+        });
+    }
+const urlParams = new URLSearchParams(window.location.search);
+const preselectedId = urlParams.get("studentId");
+    function setCurrentStudentById(id) {
+        const s = students.find(st => st.id === id);
+        currentStudent = s || null;
+
+        if (!currentStudent) {
+            if (studentNameLine) studentNameLine.textContent  = "لم يتم اختيار طالب بعد";
+            if (studentGradeLine) studentGradeLine.textContent = "اختر الطالب من القائمة أعلى الصفحة.";
+            if (studentAvatarWrap) studentAvatarWrap.style.display = "none";
+            if (dictFormHint) dictFormHint.textContent = "اختر الطالب أولاً قبل إضافة الكلمات.";
+            loadDictionaryForCurrentStudent();
+            return;
+        }
+
+        if (studentNameLine) {
+            studentNameLine.textContent = currentStudent.name + " — " + currentStudent.grade;
+        }
+        if (studentGradeLine) {
+            studentGradeLine.textContent = "القاموس الخاص بالطالب.";
+        }
+
+        if (currentStudent.avatar) {
+            if (studentAvatarImg) studentAvatarImg.src = currentStudent.avatar;
+            if (studentAvatarWrap) studentAvatarWrap.style.display = "block";
+        } else {
+            if (studentAvatarWrap) studentAvatarWrap.style.display = "none";
+        }
+
+        if (dictFormHint) {
+            dictFormHint.textContent = "الكلمات التي يتم حفظها الآن تخص الطالب: " +
+                currentStudent.name + " (" + currentStudent.grade + ").";
+        }
+
+        loadDictionaryForCurrentStudent();
+    }
+    // ===== تحميل الطلاب وفلتر الطالب =====
+    function loadStudents() {
+        try {
+            const raw = localStorage.getItem(STORAGE_KEY_STUDENTS);
+            if (!raw) {
+                students = [];
+            } else {
+                const parsed = JSON.parse(raw) || [];
+                students = parsed.map(s => ({
+                id:     s.id,
+                name:   s.name,
+                grade:  s.grade,
+                avatar: s.avatar || null
+            })).filter(s => s.id && s.name);
+
+            }
+        } catch (e) {
+            console.error("Error loading students list:", e);
+            students = [];
+        }
+
+        if (studentSelect) {
+            studentSelect.innerHTML = `<option value="">اختر الطالب...</option>`;
+            students.forEach(s => {
+                const opt = document.createElement("option");
+                opt.value = s.id;
+                opt.textContent = `${s.name} — ${s.grade}`;
+                studentSelect.appendChild(opt);
+            });
+}
+
+if (students.length === 0) {
+    if (studentNameLine) {
+        studentNameLine.textContent = "لا يوجد طلاب مسجّلون بعد";
+    }
+    if (studentGradeLine) {
+        studentGradeLine.textContent = "اذهب إلى صفحة (الطلاب) لإضافة طالب ثم عد إلى هنا.";
+    }
+    if (dictFormHint) {
+        dictFormHint.textContent = "لا يمكن إضافة كلمات قبل إضافة طالب من صفحة (الطلاب).";
+    }
+} else {
+}
+    // اختيار تلقائي بناءً على الرابط
+    if (preselectedId && students.some(s => s.id === preselectedId)) {
+        studentSelect.value = preselectedId;
+        setCurrentStudentById(preselectedId);
+    } else {
+        const first = students[0];
+        studentSelect.value = first.id;
+        setCurrentStudentById(first.id);
+    }
+}
+
+    if (studentSelect) {
+        studentSelect.addEventListener("change", function () {
+            const id = studentSelect.value || "";
+            setCurrentStudentById(id);
+        });
+    }
+
+    // ===== إعدادات الصوت =====
+    function loadAudioSettings() {
+        try {
+            const savedVoice = localStorage.getItem(STORAGE_KEY_VOICE);
+            const savedRate  = localStorage.getItem(STORAGE_KEY_RATE);
+            if (savedVoice) selectedVoiceName = savedVoice;
+            if (savedRate) {
+                const r = parseFloat(savedRate);
+                if (!Number.isNaN(r) && r > 0.4 && r < 2) {
+                    speechRate = r;
+                }
+            }
+        } catch (err) {
+            console.error("Error loading audio settings:", err);
+        }
+        if (rateValueSpan) {
+            rateValueSpan.textContent = speechRate.toFixed(2);
+        }
+    }
+
+    function saveAudioSettings() {
+        try {
+            localStorage.setItem(STORAGE_KEY_VOICE, selectedVoiceName || "");
+            localStorage.setItem(STORAGE_KEY_RATE, String(speechRate));
+        } catch (err) {
+            console.error("Error saving audio settings:", err);
+        }
+    }
+
+    function populateVoices() {
+        if (!("speechSynthesis" in window) || !voiceSelect) return;
+        voices = window.speechSynthesis.getVoices() || [];
+        const englishVoices = voices.filter(v => v.lang && v.lang.toLowerCase().startsWith("en"));
+
+        voiceSelect.innerHTML = '<option value="">اختيار تلقائي (أفضل صوت إنجليزي)</option>';
+        englishVoices.forEach(v => {
+            const option = document.createElement("option");
+            option.value = v.name;
+            option.textContent = `${v.name} (${v.lang})`;
+            voiceSelect.appendChild(option);
+        });
+
+        if (selectedVoiceName) {
+            const found = englishVoices.find(v => v.name === selectedVoiceName);
+            if (found) voiceSelect.value = selectedVoiceName;
+        }
+    }
+
+    function initVoices() {
+        if (!("speechSynthesis" in window)) return;
+        populateVoices();
+        window.speechSynthesis.onvoiceschanged = populateVoices;
+    }
+
+    function speak(text) {
+        if (!("speechSynthesis" in window)) return;
+        const t = (text || "").trim();
+        if (!t) return;
+
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(t);
+        utterance.lang  = "en-US";
+        utterance.rate  = speechRate;
+
+        if (voices && voices.length) {
+            const englishVoices = voices.filter(v => v.lang && v.lang.toLowerCase().startsWith("en"));
+            let chosen = null;
+            if (selectedVoiceName) {
+                chosen = englishVoices.find(v => v.name === selectedVoiceName);
+            }
+            if (!chosen) {
+                chosen = englishVoices[0] || voices[0];
+            }
+            if (chosen) {
+                utterance.voice = chosen;
+                utterance.lang  = chosen.lang || "en-US";
+            }
+        }
+        window.speechSynthesis.speak(utterance);
+    }
+
+    if (voiceSelect) {
+        voiceSelect.addEventListener("change", function () {
+            selectedVoiceName = voiceSelect.value || "";
+            saveAudioSettings();
+        });
+    }
+
+    function updateRateDisplay() {
+        if (rateValueSpan) {
+            rateValueSpan.textContent = speechRate.toFixed(2);
+        }
+    }
+
+    if (rateDownBtn) {
+        rateDownBtn.addEventListener("click", function () {
+            speechRate = Math.max(0.6, speechRate - 0.05);
+            updateRateDisplay();
+            saveAudioSettings();
+        });
+    }
+
+    if (rateUpBtn) {
+        rateUpBtn.addEventListener("click", function () {
+            speechRate = Math.min(1.4, speechRate + 0.05);
+            updateRateDisplay();
+            saveAudioSettings();
+        });
+    }
+
+    // ===== المودال =====
+    function openModalFromRow(row) {
+        if (!row || !modalBackdrop || !wordModal) return;
+
+        currentRow = row;
+        const ar    = row.dataset.ar    || "";
+        const en    = row.dataset.en    || "";
+        const cat   = row.dataset.cat   || "";
+        const senEn = row.dataset.senEn || "";
+        const senAr = row.dataset.senAr || "";
+
+        currentWordEn     = en;
+        currentSentenceEn = senEn;
+
+        wordModal.classList.remove("is-edit-mode");
+
+        modalWordEn.textContent     = en;
+        modalWordAr.textContent     = ar;
+        modalWordCat.textContent    = getCategoryLabel(cat);
+        modalSentenceEn.textContent = senEn;
+        modalSentenceAr.textContent = senAr;
+        modalWordCatInput.value     = cat || "noun";
+
+        clearErrors([
+            modalWordEnInput,
+            modalWordArInput,
+            modalSentenceEnInput,
+            modalSentenceArInput
+        ]);
+
+        // عرض أزرار العرض / إخفاء أزرار التعديل
+        if (modalViewActions) modalViewActions.style.display = "flex";
+        if (modalEditActions) modalEditActions.style.display = "none";
+
+        modalBackdrop.classList.add("is-visible");
+        document.body.classList.add("no-scroll");
+        modalBackdrop.setAttribute("aria-hidden", "false");
+    }
+
+    function closeModal() {
+        if (!modalBackdrop || !wordModal) return;
+        modalBackdrop.classList.remove("is-visible");
+        document.body.classList.remove("no-scroll");
+        modalBackdrop.setAttribute("aria-hidden", "true");
+        wordModal.classList.remove("is-edit-mode");
+        currentRow = null;
+    }
+
+    if (tbody) {
+        tbody.addEventListener("click", function (e) {
+            const btn = e.target.closest(".view-word");
+            if (!btn) return;
+            const row = btn.closest("tr");
+            openModalFromRow(row);
+        });
+    }
+
+    if (modalCloseBtn) {
+        modalCloseBtn.addEventListener("click", closeModal);
+    }
+    if (modalCloseBtn2) {
+        modalCloseBtn2.addEventListener("click", closeModal);
+    }
+
+    if (modalBackdrop) {
+        modalBackdrop.addEventListener("click", function (e) {
+            if (e.target === modalBackdrop) {
+                closeModal();
+            }
+        });
+    }
+
+    document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape") {
+            // لو مودال التأكيد مفتوح، يغلق أولاً
+            if (confirmBackdrop && confirmBackdrop.style.display === "flex") {
+                closeConfirm();
+                return;
+            }
+            closeModal();
+        }
+    });
+
+    if (speakWordBtn) {
+        speakWordBtn.addEventListener("click", function () {
+            const text = wordModal && wordModal.classList.contains("is-edit-mode")
+                ? (modalWordEnInput.value || currentWordEn)
+                : currentWordEn;
+            speak(text);
+        });
+    }
+
+    if (speakSentenceBtn) {
+        speakSentenceBtn.addEventListener("click", function () {
+            const text = wordModal && wordModal.classList.contains("is-edit-mode")
+                ? (modalSentenceEnInput.value || currentSentenceEn)
+                : currentSentenceEn;
+            speak(text);
+        });
+    }
+
+    if (modalEditBtn && wordModal) {
+        modalEditBtn.addEventListener("click", function () {
+            if (!currentRow) return;
+
+            modalWordEnInput.value      = modalWordEn.textContent.trim();
+            modalWordArInput.value      = modalWordAr.textContent.trim();
+            modalSentenceEnInput.value  = modalSentenceEn.textContent.trim();
+            modalSentenceArInput.value  = modalSentenceAr.textContent.trim();
+            modalWordCatInput.value     = currentRow.dataset.cat || "noun";
+
+            clearErrors([
+                modalWordEnInput,
+                modalWordArInput,
+                modalSentenceEnInput,
+                modalSentenceArInput
+            ]);
+
+            wordModal.classList.add("is-edit-mode");
+            if (modalViewActions) modalViewActions.style.display = "none";
+            if (modalEditActions) modalEditActions.style.display = "flex";
+        });
+    }
+
+    if (modalCancelBtn && wordModal) {
+        modalCancelBtn.addEventListener("click", function () {
+            // إلغاء التعديل فقط والعودة لوضع العرض
+            wordModal.classList.remove("is-edit-mode");
+            clearErrors([
+                modalWordEnInput,
+                modalWordArInput,
+                modalSentenceEnInput,
+                modalSentenceArInput
+            ]);
+            if (modalViewActions) modalViewActions.style.display = "flex";
+            if (modalEditActions) modalEditActions.style.display = "none";
+        });
+    }
+
+    if (modalSaveBtn && wordModal) {
+        modalSaveBtn.addEventListener("click", function () {
+            if (!currentRow) return;
+
+            const okEn    = validateEnglish(modalWordEnInput, { required: true });
+            const okAr    = validateArabic(modalWordArInput, { required: true });
+            const okSenEn = validateEnglish(modalSentenceEnInput, { required: false });
+            const okSenAr = validateArabic(modalSentenceArInput, { required: false });
+
+            if (!okEn || !okAr || !okSenEn || !okSenAr) return;
+
+            const newAr   = modalWordArInput.value.trim();
+            let newEn     = modalWordEnInput.value.trim();
+            let newSenEn  = modalSentenceEnInput.value.trim();
+            const newSenAr= modalSentenceArInput.value.trim();
+            const newCat  = modalWordCatInput.value || "noun";
+
+            newEn = normalizeEnglishWord(newEn);
+            if (newSenEn) {
+                newSenEn = normalizeEnglishSentence(newSenEn);
+            }
+
+            currentRow.dataset.ar    = newAr;
+            currentRow.dataset.en    = newEn;
+            currentRow.dataset.cat   = newCat;
+            currentRow.dataset.senEn = newSenEn;
+            currentRow.dataset.senAr = newSenAr;
+
+            if (currentRow.cells[0]) currentRow.cells[0].textContent = newAr;
+            if (currentRow.cells[1]) currentRow.cells[1].textContent = newEn;
+            if (currentRow.cells[2]) currentRow.cells[2].textContent = getCategoryShortLabel(newCat);
+            if (currentRow.cells[3]) currentRow.cells[3].textContent = newSenEn || "-";
+
+            modalWordEn.textContent     = newEn;
+            modalWordAr.textContent     = newAr;
+            modalWordCat.textContent    = getCategoryLabel(newCat);
+            modalSentenceEn.textContent = newSenEn;
+            modalSentenceAr.textContent = newSenAr;
+
+            currentWordEn     = newEn;
+            currentSentenceEn = newSenEn;
+
+            wordModal.classList.remove("is-edit-mode");
+            if (modalViewActions) modalViewActions.style.display = "flex";
+            if (modalEditActions) modalEditActions.style.display = "none";
+
+            rebuildRowsCache();
+            applyFiltersAndPagination(false);
+            saveDictionaryToStorage();
+            closeModal();
+            showToast("تم حفظ التعديل بنجاح.", "success");
+        });
+    }
+
+    // حذف كلمة واحدة من داخل المودال
+    if (modalDeleteBtn) {
+        modalDeleteBtn.addEventListener("click", function () {
+            if (!currentRow) return;
+            openConfirm(
+                "سيتم حذف هذه الكلمة من قاموس الطالب. هل ترغب بالمتابعة؟",
+                function () {
+                    if (!currentRow) return;
+                    const rowToRemove = currentRow;
+                    currentRow = null;
+                    rowToRemove.remove();
+                    rebuildRowsCache();
+                    applyFiltersAndPagination(true);
+                    saveDictionaryToStorage();
+                    closeModal();
+                    showToast("تم حذف الكلمة بنجاح.", "success");
+                }
+            );
+        });
+    }
+
+    // تحقق أثناء الكتابة في المودال
+    if (modalWordEnInput) modalWordEnInput.addEventListener("input", () => validateEnglish(modalWordEnInput, { required: true }));
+    if (modalWordArInput) modalWordArInput.addEventListener("input", () => validateArabic(modalWordArInput, { required: true }));
+    if (modalSentenceEnInput) modalSentenceEnInput.addEventListener("input", () => validateEnglish(modalSentenceEnInput, { required: false }));
+    if (modalSentenceArInput) modalSentenceArInput.addEventListener("input", () => validateArabic(modalSentenceArInput, { required: false }));
+
+    // تحقق أثناء الكتابة في النموذج الأساسي
+    if (enInput) enInput.addEventListener("input", () => validateEnglish(enInput, { required: true }));
+    if (arInput) arInput.addEventListener("input", () => validateArabic(arInput, { required: true }));
+    if (exEnInput) exEnInput.addEventListener("input", () => validateEnglish(exEnInput, { required: false }));
+    if (exArInput) exArInput.addEventListener("input", () => validateArabic(exArInput, { required: false }));
+
+    // إضافة كلمة جديدة
+    if (form && tbody) {
+        form.addEventListener("submit", function (e) {
+            e.preventDefault();
+
+            if (!currentStudent) {
+                showToast("الرجاء اختيار الطالب أولاً قبل إضافة الكلمات.", "error");
+                return;
+            }
+
+            const okEn    = validateEnglish(enInput, { required: true });
+            const okAr    = validateArabic(arInput, { required: true });
+            const okSenEn = validateEnglish(exEnInput, { required: false });
+            const okSenAr = validateArabic(exArInput, { required: false });
+
+            if (!okEn || !okAr || !okSenEn || !okSenAr) return;
+
+            const arRaw   = (arInput.value || "").trim();
+            let enRaw     = (enInput.value || "").trim();
+            let senEnRaw  = (exEnInput.value || "").trim();
+            const senArRaw= (exArInput.value || "").trim();
+            const cat     = catSelect.value;
+
+            if (!arRaw || !enRaw || !cat) return;
+
+            const ar      = arRaw;
+            let   en      = normalizeEnglishWord(enRaw);
+            let   senEn   = senEnRaw ? normalizeEnglishSentence(senEnRaw) : "";
+
+            const tr = createRowFromData({
+   	    ar,
+            en,
+            category:    cat,
+            sentence_en: senEn,
+            sentence_ar: senArRaw,
+            createdAt:   new Date().toISOString()   // << إضافة التاريخ هنا
+            });
+
+
+            tbody.appendChild(tr);
+
+            form.reset();
+            clearErrors([arInput, enInput, exEnInput, exArInput]);
+
+            rebuildRowsCache();
+            currentPage = Math.ceil(allRows.length / PAGE_SIZE);
+            applyFiltersAndPagination(false);
+            saveDictionaryToStorage();
+            showToast("تم حفظ الكلمة بنجاح.", "success");
+        });
+    }
+
+    // البحث والتصنيف
+    if (searchInput) {
+        searchInput.addEventListener("input", () => applyFiltersAndPagination(true));
+    }
+    if (categoryFilter) {
+        categoryFilter.addEventListener("change", () => applyFiltersAndPagination(true));
+    }
+
+    // الترقيم
+    if (paginationContainer) {
+        paginationContainer.addEventListener("click", function (e) {
+            const btn = e.target.closest(".page-btn");
+            if (!btn || btn.disabled) return;
+
+            const page = btn.dataset.page;
+            if (page === "prev") {
+                if (currentPage > 1) currentPage--;
+            } else if (page === "next") {
+                if (currentPage < totalPages) currentPage++;
+            } else {
+                const num = parseInt(page, 10);
+                if (!Number.isNaN(num)) currentPage = num;
+            }
+            applyFiltersAndPagination(false);
+        });
+    }
+
+    // تنزيل ملف نصي
+    function downloadTextFile(filename, text, mime) {
+        const blob = new Blob([text], { type: mime || "text/plain;charset=utf-8" });
+        const url  = URL.createObjectURL(blob);
+        const a    = document.createElement("a");
+        a.href     = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+
+    // تصدير JSON
+    if (exportJsonBtn) {
+        exportJsonBtn.addEventListener("click", function () {
+            if (!currentStudent) {
+                showToast("الرجاء اختيار الطالب أولاً قبل التصدير.", "error");
+                return;
+            }
+            const data = serializeRows();
+            const json = JSON.stringify(data, null, 2);
+            const filename = "dictionary_" + currentStudent.name + ".json";
+            downloadTextFile(filename, json, "application/json;charset=utf-8");
+            showToast("تم تصدير القاموس بصيغة JSON.", "success");
+        });
+    }
+
+    // تصدير XML
+    if (exportXmlBtn) {
+        exportXmlBtn.addEventListener("click", function () {
+            if (!currentStudent) {
+                showToast("الرجاء اختيار الطالب أولاً قبل التصدير.", "error");
+                return;
+            }
+            const data = serializeRows();
+            let xml = '<?xml version="1.0" encoding="UTF-8"?>\n<dictionary>\n';
+            data.forEach(item => {
+                xml += "  <word>\n";
+                xml += "    <ar>" + (item.ar || "") + "</ar>\n";
+                xml += "    <en>" + (item.en || "") + "</en>\n";
+                xml += "    <category>" + (item.category || "") + "</category>\n";
+                xml += "    <sentence_en>" + (item.sentence_en || "") + "</sentence_en>\n";
+                xml += "    <sentence_ar>" + (item.sentence_ar || "") + "</sentence_ar>\n";
+		xml += "    <createdAt>" + (item.createdAt || "") + "</createdAt>\n";
+                xml += "  </word>\n";
+            });
+            xml += "</dictionary>\n";
+            const filename = "dictionary_" + currentStudent.name + ".xml";
+            downloadTextFile(filename, xml, "application/xml;charset=utf-8");
+            showToast("تم تصدير القاموس بصيغة XML.", "success");
+        });
+    }
+
+    // حذف جميع الكلمات للطالب الحالي
+    if (clearAllBtn) {
+        clearAllBtn.addEventListener("click", function () {
+            if (!currentStudent) {
+                showToast("الرجاء اختيار الطالب أولاً قبل الحذف.", "error");
+                return;
+            }
+            if (!allRows.length) {
+                showToast("لا توجد كلمات لحذفها لهذا الطالب.", "info");
+                return;
+            }
+
+            openConfirm(
+                "سيتم حذف جميع الكلمات من قاموس هذا الطالب. هل ترغب بالمتابعة؟",
+                function () {
+                    if (!tbody) return;
+                    tbody.innerHTML = "";
+                    allRows = [];
+                    updateCount();
+                    applyFiltersAndPagination(true);
+                    saveDictionaryToStorage();
+                    showToast("تم حذف جميع كلمات الطالب بنجاح.", "success");
+                }
+            );
+        });
+    }
+
+    // استيراد JSON / XML
+    if (importFileInput) {
+        importFileInput.addEventListener("change", function () {
+            const file = importFileInput.files[0];
+            importFileInput.value = "";
+            if (!file) return;
+
+            if (!currentStudent) {
+                showToast("الرجاء اختيار الطالب أولاً قبل الاستيراد.", "error");
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const content = e.target.result;
+                handleImportContent(file.name, content);
+            };
+            reader.readAsText(file, "utf-8");
+        });
+    }
+
+    function handleImportContent(filename, content) {
+        let imported = [];
+        try {
+            if (filename.toLowerCase().endsWith(".json")) {
+                const data = JSON.parse(content);
+                if (Array.isArray(data)) imported = data;
+            } else if (filename.toLowerCase().endsWith(".xml")) {
+                const parser = new DOMParser();
+                const xmlDoc = parser.parseFromString(content, "application/xml");
+                const wordNodes = xmlDoc.getElementsByTagName("word");
+                imported = Array.from(wordNodes).map(node => {
+                    const getText = tag => {
+                        const el = node.getElementsByTagName(tag)[0];
+                        return el ? (el.textContent || "") : "";
+                    };
+                    return {
+                        ar:          getText("ar"),
+                        en:          getText("en"),
+                        category:    getText("category"),
+                        sentence_en: getText("sentence_en"),
+                        sentence_ar: getText("sentence_ar"),
+			createdAt:   getText("createdAt") || new Date().toISOString()
+                    };
+                });
+            }
+        } catch (err) {
+            console.error("Import error:", err);
+        }
+
+        if (!Array.isArray(imported) || !imported.length) {
+            if (importResult) {
+                importResult.textContent = "لم يتم التعرف على بيانات صالحة في الملف.";
+            }
+            showToast("فشل الاستيراد: ملف غير صالح.", "error");
+            return;
+        }
+
+        const existing = new Set(
+            allRows.map(r => (r.dataset.en || "").trim().toLowerCase()).filter(Boolean)
+        );
+
+        let addedCount   = 0;
+        let skippedCount = 0;
+
+        imported.forEach(item => {
+            const enRaw = (item.en || "").trim();
+            if (!enRaw) {
+                skippedCount++;
+                return;
+            }
+
+            const enNormalized = normalizeEnglishWord(enRaw);
+            const enKey        = enNormalized.toLowerCase();
+
+            if (existing.has(enKey)) {
+                skippedCount++;
+                return;
+            }
+
+            const ar   = (item.ar || "").trim();
+            const cat  = (item.category || "").trim() || "noun";
+            let senEn  = (item.sentence_en || "").trim();
+            const senAr= (item.sentence_ar || "").trim();
+
+            if (senEn) {
+                senEn = normalizeEnglishSentence(senEn);
+            }
+
+            const tr = createRowFromData({
+                ar,
+                en: enNormalized,
+                category: cat,
+                sentence_en: senEn,
+                sentence_ar: senAr,
+		createdAt: item.createdAt || new Date().toISOString()
+            });
+
+            tbody.appendChild(tr);
+            existing.add(enKey);
+            addedCount++;
+        });
+
+        rebuildRowsCache();
+        applyFiltersAndPagination(true);
+        saveDictionaryToStorage();
+
+        if (importResult) {
+            importResult.textContent =
+                "تم إضافة " + addedCount + " كلمة جديدة — وتم تجاهل " +
+                skippedCount + " كلمة موجودة مسبقًا.";
+        }
+        showToast("تم استيراد الكلمات بنجاح.", "success");
+    }
+/* ========== SORTING ========== */
+
+let currentSortKey = null;
+let currentSortDir = "asc"; // asc | desc
+
+function sortRows(key) {
+    if (!allRows.length) return;
+
+    // إذا ضغط نفس العمود — نعكس الاتجاه
+    if (currentSortKey === key) {
+        currentSortDir = currentSortDir === "asc" ? "desc" : "asc";
+    } else {
+        currentSortKey = key;
+        currentSortDir = "asc";
+    }
+
+    // إزالة تمييز الفرز من جميع الأعمدة
+    document.querySelectorAll("th.sortable").forEach(th => {
+        th.classList.remove("asc", "desc", "sort-active");
+    });
+
+    // إضافة التمييز للعمود المحدد
+    const activeTh = document.querySelector(`th.sortable[data-key='${key}']`);
+    if (activeTh) {
+        activeTh.classList.add("sort-active");
+        activeTh.classList.add(currentSortDir);
+    }
+
+    // فرز الصفوف
+    allRows.sort((a, b) => {
+        const A = (a.dataset[key] || "").toLowerCase();
+        const B = (b.dataset[key] || "").toLowerCase();
+
+        if (A < B) return currentSortDir === "asc" ? -1 : 1;
+        if (A > B) return currentSortDir === "asc" ? 1 : -1;
+        return 0;
+    });
+
+    // إعادة إضافة الصفوف بالترتيب الجديد
+    allRows.forEach(r => tbody.appendChild(r));
+
+    applyFiltersAndPagination(true);
+}
+
+/* تفعيل الفرز عند الضغط على رأس العمود */
+document.querySelectorAll("th.sortable").forEach(th => {
+    th.addEventListener("click", function () {
+        sortRows(this.dataset.key);
+    });
+});
+// ================= إعادة الترتيب الافتراضي =================
+const resetSortBtn = document.getElementById("reset-sort-btn");
+if (resetSortBtn) {
+    resetSortBtn.addEventListener("click", function () {
+
+        // 1) إزالة السهم + الكلاسات من كل الأعمدة
+        document.querySelectorAll("th.sortable").forEach(th => {
+            th.classList.remove("sort-asc", "sort-desc", "sorted-column");
+            th.removeAttribute("data-sort-dir");
+
+            // الحل الفعلي 100%
+            th.innerHTML = th.textContent.trim();
+        });
+
+        // 2) استعادة الترتيب الأساسي حسب تاريخ الإضافة
+        allRows.sort((a, b) => {
+            const da = a.dataset.createdAt || "";
+            const db = b.dataset.createdAt || "";
+            return da.localeCompare(db);
+        });
+
+        // 3) إعادة بناء الجسم
+        tbody.innerHTML = "";
+        allRows.forEach(r => tbody.appendChild(r));
+
+        // 4) تحديث الفلاتر والصفحات
+        applyFiltersAndPagination(true);
+
+        // 5) إيقاف أي فرز فعّال
+        currentSortKey = null;
+        currentSortDir = null;
+    });
+}
+
+    // ===== تهيئة أولية =====
+    loadAudioSettings();
+    initVoices();
+    loadStudents();
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>قاموس الطالب | الطلاب</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet" />
+
+    <link rel="stylesheet" href="style.css" />
+<link rel="manifest" href="manifest.json">
+
+<script>
+if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+        navigator.serviceWorker.register("service-worker.js")
+            .catch(err => console.log("SW registration failed:", err));
+    });
+}
+</script>
+
+</head>
+<body>
+<div class="app-shell">
+
+    <!-- رأس الصفحة -->
+    <header class="app-header">
+        <div class="container header-content">
+            <div class="brand">
+                <div class="brand-mark">
+                    <span>A+</span>
+                </div>
+                <div class="brand-text">
+                    <span class="brand-title">قاموس الطالب</span>
+                    <span class="brand-subtitle-en">Student Dictionary</span>
+                </div>
+            </div>
+
+            <button class="nav-toggle" type="button" aria-label="فتح/إغلاق القائمة" aria-expanded="false">
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+            </button>
+
+            <nav class="main-nav" aria-label="القائمة الرئيسية">
+                <a href="index.html" class="nav-link">الرئيسية</a>
+                <a href="students.html" class="nav-link active">الطلاب</a>
+                <a href="dictionary.html" class="nav-link">القاموس</a>
+                <a href="quiz.html" class="nav-link">الاختبارات</a>
+                <a href="about.html" class="nav-link">عن القاموس</a>
+                <a href="help.html" class="nav-link">مساعدة</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="app-main">
+        <div class="container">
+
+            <header class="page-header">
+                <div>
+                    <h1 class="page-title">إدارة الطلاب</h1>
+                    <p class="page-description">
+                        أضف أسماء الأبناء وصفوفهم الدراسية، ليظهر لكل طالب قاموس خاص به داخل صفحة القاموس، مع إمكانية وضع صورة رمزية بسيطة.
+                    </p>
+                </div>
+            </header>
+
+            <section class="page-layout-2col">
+                <!-- نموذج إضافة / تعديل طالب -->
+                <article class="card">
+                    <h2 class="card-title">إضافة / تعديل طالب</h2>
+                    <p class="card-description">
+                        أدخل اسم الطالب واختر الصف الدراسي. يمكنك أيضًا اختيار صورة رمزية صغيرة (اختياري).
+                    </p>
+
+                    <form id="student-form" class="form-grid">
+                        <div class="form-field">
+                            <label class="form-label" for="student-name">اسم الطالب *</label>
+                            <input
+                                type="text"
+                                id="student-name"
+                                class="form-control"
+                                placeholder="مثال: عبدالله"
+                                required
+                                data-error-target="error-student-name"
+                            />
+                            <div class="field-error" id="error-student-name"></div>
+                        </div>
+
+                        <div class="form-field">
+                            <label class="form-label" for="student-grade">الصف الدراسي *</label>
+                            <select id="student-grade" class="form-control" required>
+                                <option value="">اختر الصف...</option>
+                                <option value="سادس ابتدائي">سادس ابتدائي</option>
+                                <option value="أول متوسط">أول متوسط</option>
+                                <option value="ثاني متوسط">ثاني متوسط</option>
+                                <option value="ثالث متوسط">ثالث متوسط</option>
+                                <option value="أول ثانوي">أول ثانوي</option>
+                                <option value="ثاني ثانوي">ثاني ثانوي</option>
+                                <option value="ثالث ثانوي">ثالث ثانوي</option>
+                            </select>
+                        </div>
+
+                        <div class="form-field">
+                            <label class="form-label" for="student-avatar">صورة الطالب (اختياري)</label>
+                            <input
+                                type="file"
+                                id="student-avatar"
+                                class="form-control"
+                                accept="image/*"
+                            />
+                            <p style="font-size:0.75rem;color:#9ca3af;margin-top:0.25rem;">
+                                يمكنك اختيار صورة صغيرة (مثلاً من ألبوم الصور). إذا لم تختر صورة، سيظهر الاسم فقط.
+                            </p>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary" id="student-submit-btn">إضافة الطالب</button>
+                            <button type="reset" class="btn btn-outline" id="student-reset-btn">مسح</button>
+                        </div>
+
+                        <p class="form-hint" id="student-form-hint">
+                            يتم حفظ الطلاب على هذا الجهاز، ويمكن تصدير القائمة كملف JSON للاحتفاظ بنسخة احتياطية.
+                        </p>
+                    </form>
+                </article>
+
+                <!-- قائمة الطلاب -->
+                <article class="card">
+                    <div class="table-header">
+                        <div>
+                            <h2 class="card-title">قائمة الطلاب</h2>
+                            <p class="card-description">
+                                الطلاب الذين سيظهرون في صفحة القاموس. يمكنك تعديل بياناتهم أو حذفهم. الصورة الرمزية تظهر أيضًا في القاموس بجانب الاسم.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="table-wrapper">
+                        <table class="data-table" aria-label="قائمة الطلاب">
+                            <thead>
+                            <tr>
+                                <th>الطالب</th>
+                                <th>الصف</th>
+                                <th></th>
+                            </tr>
+                            </thead>
+                            <tbody id="students-body">
+                            <!-- يتم ملؤها من التخزين -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <section class="data-tools" aria-label="إدارة بيانات الطلاب">
+                        <h3 class="data-tools-title">نسخ احتياطي لقائمة الطلاب</h3>
+                        <p class="data-tools-text">
+                            يمكنك حفظ قائمة الطلاب كملف JSON أو استعادتها عند الحاجة. تشمل النسخة الاحتياطية الصور الرمزية إن وُجدت.
+                        </p>
+                        <div class="data-tools-actions">
+                            <button type="button" class="btn btn-outline data-btn" id="export-students-btn">
+                                تصدير قائمة الطلاب JSON
+                            </button>
+                            <label class="btn btn-primary data-btn">
+                                استيراد قائمة الطلاب JSON
+                                <input
+                                    type="file"
+                                    id="import-students-file"
+                                    accept=".json"
+                                    style="display: none;"
+                                />
+                            </label>
+                        </div>
+                        <p class="data-tools-result" id="students-import-result"></p>
+                    </section>
+                </article>
+            </section>
+        </div>
+    </main>
+
+    <footer class="app-footer">
+        <div class="container footer-content">
+            <div class="footer-main">
+                <span class="footer-title">قاموس الطالب</span>
+                <span class="footer-subtitle">إدارة الطلاب والصفوف للمفردات المنزلية.</span>
+            </div>
+            <div class="footer-links">
+                <a href="about.html">عن القاموس</a>
+                <a href="help.html">مساعدة</a>
+            </div>
+        </div>
+    </footer>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const STORAGE_KEY_STUDENTS = "student";
+
+    const navToggle = document.querySelector(".nav-toggle");
+    const mainNav = document.querySelector(".main-nav");
+    if (navToggle && mainNav) {
+        navToggle.addEventListener("click", function () {
+            const isOpen = mainNav.classList.toggle("nav-open");
+            navToggle.classList.toggle("nav-open", isOpen);
+            navToggle.setAttribute("aria-expanded", isOpen ? "true" : "false");
+        });
+    }
+
+    const form = document.getElementById("student-form");
+    const nameInput = document.getElementById("student-name");
+    const gradeSelect = document.getElementById("student-grade");
+    const avatarInput = document.getElementById("student-avatar");
+    const studentsBody = document.getElementById("students-body");
+    const exportBtn = document.getElementById("export-students-btn");
+    const importInput = document.getElementById("import-students-file");
+    const importResult = document.getElementById("students-import-result");
+    const submitBtn = document.getElementById("student-submit-btn");
+    const resetBtn = document.getElementById("student-reset-btn");
+    const formHint = document.getElementById("student-form-hint");
+
+    let students = [];
+    let editingId = null;          // لو في طالب تحت التعديل الآن
+    let currentAvatarData = null;  // الصورة الحالية في النموذج (Base64)
+
+    function setError(input, message) {
+        if (!input) return;
+        const errorId = input.dataset.errorTarget;
+        const errorEl = errorId ? document.getElementById(errorId) : null;
+        if (errorEl) errorEl.textContent = message || "";
+        if (message) {
+            input.classList.add("input-error");
+        } else {
+            input.classList.remove("input-error");
+        }
+    }
+
+    function generateId() {
+        return "s_" + Date.now() + "_" + Math.floor(Math.random() * 100000);
+    }
+
+    function saveStudents() {
+        try {
+            // الطلاب هنا يحتفظون بكل الحقول (القديمة + الإضافية مثل lastUpdate و lastScore و lastTestDate)
+            localStorage.setItem(STORAGE_KEY_STUDENTS, JSON.stringify(students));
+        } catch (e) {
+            console.error("Error saving students:", e);
+        }
+    }
+
+    function renderStudents() {
+        studentsBody.innerHTML = "";
+        students.forEach(s => {
+            const tr = document.createElement("tr");
+            tr.dataset.id = s.id;
+            const avatarHtml = s.avatar
+                ? `<img src="${s.avatar}" alt="صورة ${s.name}" style="width:32px;height:32px;border-radius:50%;object-fit:cover;margin-left:0.35rem;">`
+                : "";
+            tr.innerHTML = `
+                <td>
+                    <div style="display:flex;align-items:center;gap:0.35rem;justify-content:flex-start;">
+                        ${avatarHtml}
+                        <span>${s.name}</span>
+                    </div>
+                </td>
+                <td>${s.grade}</td>
+                <td>
+                    <button type="button" class="btn-table-action btn-edit-student">
+                        تعديل
+                    </button>
+                    <button type="button" class="btn-table-action btn-delete-student">
+                        حذف
+                    </button>
+                </td>
+            `;
+            studentsBody.appendChild(tr);
+        });
+    }
+
+    function loadStudents() {
+        try {
+            const raw = localStorage.getItem(STORAGE_KEY_STUDENTS);
+            if (!raw) {
+                students = [];
+            } else {
+                const parsed = JSON.parse(raw) || [];
+                // مهمة: نحافظ على الحقول الإضافية (lastUpdate, lastScore, lastTestDate ...)
+                students = parsed.map(s => {
+                    const base = {
+                        id: s.id || generateId(),
+                        name: s.name || "",
+                        grade: s.grade || "",
+                        avatar: s.avatar || null
+                    };
+                    // ندمج: الحقول القديمة + الأساسية مع ضمان avatar/id/name/grade صحيحة
+                    return { ...s, ...base };
+                });
+            }
+            saveStudents(); // نحفظ بعد التصحيح مرة واحدة بصيغة موحدة
+            renderStudents();
+        } catch (e) {
+            console.error("Error loading students:", e);
+            students = [];
+        }
+    }
+
+    function resetFormToAddMode() {
+        editingId = null;
+        currentAvatarData = null;
+        if (form) form.reset();
+        if (avatarInput) avatarInput.value = "";
+        setError(nameInput, "");
+        if (submitBtn) submitBtn.textContent = "إضافة الطالب";
+        if (formHint) {
+            formHint.textContent =
+                "يتم حفظ الطلاب على هذا الجهاز، ويمكن تصدير القائمة كملف JSON للاحتفاظ بنسخة احتياطية.";
+        }
+    }
+
+    if (resetBtn) {
+        resetBtn.addEventListener("click", function () {
+            setTimeout(resetFormToAddMode, 0);
+        });
+    }
+
+    // قراءة الصورة وتحويلها إلى Base64 عند اختيار ملف
+    if (avatarInput) {
+        avatarInput.addEventListener("change", function () {
+            const file = avatarInput.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                currentAvatarData = e.target.result; // data:image/...
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+
+    if (form) {
+        form.addEventListener("submit", function (e) {
+            e.preventDefault();
+            const name = (nameInput.value || "").trim();
+            const grade = gradeSelect.value;
+
+            if (!name) {
+                setError(nameInput, "اسم الطالب مطلوب.");
+                return;
+            }
+            setError(nameInput, "");
+
+            if (!grade) {
+                alert("الرجاء اختيار الصف الدراسي.");
+                return;
+            }
+
+            if (editingId) {
+                // تعديل طالب موجود
+                const exists = students.some(
+                    s => s.id !== editingId && s.name === name && s.grade === grade
+                );
+                if (exists) {
+                    setError(nameInput, "طالب بنفس الاسم والصف موجود مسبقًا.");
+                    return;
+                }
+
+                const idx = students.findIndex(s => s.id === editingId);
+                if (idx !== -1) {
+                    students[idx].name = name;
+                    students[idx].grade = grade;
+                    // لو اختار صورة جديدة، نستخدمها، وإلا نحتفظ بالقديمة
+                    if (currentAvatarData) {
+                        students[idx].avatar = currentAvatarData;
+                    }
+                    // حقول مثل lastUpdate / lastScore / lastTestDate تظل كما هي
+                }
+
+                saveStudents();
+                renderStudents();
+                resetFormToAddMode();
+            } else {
+                // إضافة طالب جديد
+                const exists = students.some(
+                    s => s.name === name && s.grade === grade
+                );
+                if (exists) {
+                    setError(nameInput, "هذا الطالب بنفس الصف مسجل مسبقًا.");
+                    return;
+                }
+
+                const student = {
+                    id: generateId(),
+                    name,
+                    grade,
+                    avatar: currentAvatarData || null,
+                    // الحقول الإضافية لا تُملأ الآن، ستملأها صفحات أخرى (القاموس / الاختبارات)
+                    lastUpdate: null,
+                    lastScore: null,
+                    lastTestDate: null
+                };
+
+                students.push(student);
+                saveStudents();
+                renderStudents();
+                resetFormToAddMode();
+            }
+        });
+    }
+
+    if (studentsBody) {
+        studentsBody.addEventListener("click", function (e) {
+            const editBtn = e.target.closest(".btn-edit-student");
+            const deleteBtn = e.target.closest(".btn-delete-student");
+
+            // تعديل
+            if (editBtn) {
+                const tr = editBtn.closest("tr");
+                const id = tr.dataset.id;
+                if (!id) return;
+
+                const student = students.find(s => s.id === id);
+                if (!student) return;
+
+                editingId = id;
+                nameInput.value = student.name;
+                gradeSelect.value = student.grade;
+                currentAvatarData = student.avatar || null;
+                if (avatarInput) avatarInput.value = ""; // لا يمكن تعبئة ملف تلقائيًا، نكتفي بالاحتفاظ بالبيانات
+
+                setError(nameInput, "");
+                if (submitBtn) submitBtn.textContent = "حفظ التعديل";
+                if (formHint) {
+                    formHint.textContent =
+                        "أنت الآن في وضع تعديل بيانات الطالب. يمكنك تغيير الاسم أو الصف أو اختيار صورة جديدة، ثم الضغط على (حفظ التعديل).";
+                }
+                return;
+            }
+
+            // حذف
+            if (deleteBtn) {
+                const tr = deleteBtn.closest("tr");
+                const id = tr.dataset.id;
+                if (!id) return;
+
+                if (!confirm("هل تريد حذف هذا الطالب؟ لن تُحذف كلماته من القاموس تلقائيًا.")) {
+                    return;
+                }
+
+                students = students.filter(s => s.id !== id);
+                saveStudents();
+                renderStudents();
+
+                if (editingId === id) {
+                    resetFormToAddMode();
+                }
+            }
+        });
+    }
+
+    if (exportBtn) {
+        exportBtn.addEventListener("click", function () {
+            const data = { students };
+            const json = JSON.stringify(data, null, 2);
+            const blob = new Blob([json], { type: "application/json;charset=utf-8" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "students_list.json";
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        });
+    }
+
+    if (importInput) {
+        importInput.addEventListener("change", function () {
+            const file = importInput.files[0];
+            importInput.value = "";
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                try {
+                    const content = e.target.result;
+                    const obj = JSON.parse(content);
+                    if (!obj || !Array.isArray(obj.students)) {
+                        importResult.textContent = "الملف لا يحتوي على قائمة طلاب صالحة.";
+                        return;
+                    }
+
+                    let added = 0;
+                    let skipped = 0;
+
+                    obj.students.forEach(s => {
+                        const name = (s.name || "").trim();
+                        const grade = (s.grade || "").trim();
+                        if (!name || !grade) {
+                            skipped++;
+                            return;
+                        }
+
+                        const exists = students.some(
+                            st => st.name === name && st.grade === grade
+                        );
+                        if (exists) {
+                            skipped++;
+                            return;
+                        }
+
+                        students.push({
+                            id: s.id || generateId(),
+                            name,
+                            grade,
+                            avatar: s.avatar || null,
+                            // نحافظ على الحقول الإضافية لو كانت موجودة في ملف النسخة الاحتياطية
+                            lastUpdate: s.lastUpdate || null,
+                            lastScore: (s.lastScore !== undefined ? s.lastScore : null),
+                            lastTestDate: s.lastTestDate || null
+                        });
+                        added++;
+                    });
+
+                    saveStudents();
+                    renderStudents();
+                    importResult.textContent =
+                        "تم إضافة " + added + " طالب/طالبة — وتم تجاهل " + skipped + " موجودين مسبقًا.";
+                } catch (err) {
+                    console.error(err);
+                    importResult.textContent = "حدث خطأ أثناء قراءة الملف.";
+                }
+            };
+            reader.readAsText(file, "utf-8");
+        });
+    }
+
+    loadStudents();
+});
+</script>
+</body>
+</html>

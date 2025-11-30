@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>مساعدة | قاموس الطالب</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet" />
+
+    <link rel="stylesheet" href="style.css" />
+<link rel="manifest" href="manifest.json">
+
+<script>
+if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+        navigator.serviceWorker.register("service-worker.js")
+            .catch(err => console.log("SW registration failed:", err));
+    });
+}
+</script>
+
+</head>
+
+<body>
+<div class="app-shell">
+
+    <!-- رأس الصفحة -->
+    <header class="app-header">
+        <div class="container header-content">
+            <div class="brand">
+                <div class="brand-mark"><span>A+</span></div>
+                <div class="brand-text">
+                    <span class="brand-title">قاموس الطالب</span>
+                    <span class="brand-subtitle-en">Student Dictionary</span>
+                </div>
+            </div>
+
+            <button class="nav-toggle" aria-label="فتح/إغلاق القائمة" aria-expanded="false">
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+            </button>
+
+            <nav class="main-nav" aria-label="القائمة الرئيسية">
+                <a href="index.html" class="nav-link">الرئيسية</a>
+                <a href="students.html" class="nav-link">الطلاب</a>
+                <a href="dictionary.html" class="nav-link">القاموس</a>
+                <a href="quiz.html" class="nav-link">الاختبارات</a>
+                <a href="about.html" class="nav-link">عن القاموس</a>
+                <a href="help.html" class="nav-link active">مساعدة</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- المحتوى -->
+    <main class="app-main">
+        <div class="container">
+
+            <header class="page-header">
+                <h1 class="page-title">مركز المساعدة</h1>
+                <p class="page-description">
+                    هنا ستجد شرحاً مبسطاً يساعدك على استخدام القاموس بطريقة صحيحة وسريعة.
+                </p>
+            </header>
+
+            <!-- قسم: الخطوات الأساسية -->
+            <section class="info-section card">
+                <h2 class="card-title">البدء السريع</h2>
+                <ol class="info-list ordered">
+                    <li>اذهب إلى صفحة "الطلاب" وأضف الطالب وأدخل اسمه وصفه.</li>
+                    <li>اختر الطالب من قائمة الطلاب في صفحة القاموس.</li>
+                    <li>ابدأ بإضافة الكلمات والجمل مباشرة.</li>
+                    <li>استخدم البحث والتصنيفات لتسهيل الوصول للكلمات.</li>
+                    <li>افتح أي كلمة لعرض تفاصيلها أو تعديلها أو حذفها.</li>
+                </ol>
+            </section>
+
+            <!-- قسم: إدارة البيانات -->
+            <section class="info-section card">
+                <h2 class="card-title">إدارة البيانات</h2>
+                <ul class="info-list">
+                    <li>يمكنك تصدير قاموس الطالب إلى ملف JSON أو XML.</li>
+                    <li>يمكنك استيراد ملف يحتوي على كلمات جاهزة.</li>
+                    <li>يتم تجاهل الكلمات المكررة تلقائياً.</li>
+                    <li>بيانات كل طالب محفوظة داخل جهازك فقط.</li>
+                </ul>
+            </section>
+
+            <!-- قسم: النطق -->
+            <section class="info-section card">
+                <h2 class="card-title">النطق الصوتي</h2>
+                <p class="card-description">
+                    داخل بطاقة الكلمة، يمكنك نطق الكلمة والجملة باللهجات الإنجليزية المختلفة، 
+                    مع القدرة على التحكم في سرعة النطق.
+                </p>
+            </section>
+
+            <!-- قسم: الاختبارات -->
+            <section class="info-section card">
+                <h2 class="card-title">الاختبارات</h2>
+                <p class="card-description">
+                    يمكنك استخدام صفحة الاختبارات لإنشاء تدريبات للطالب، مثل:
+                </p>
+                <ul class="info-list">
+                    <li>اختيار من متعدد.</li>
+                    <li>كتابة الكلمة (Spelling).</li>
+                    <li>تكملة الجملة.</li>
+                </ul>
+            </section>
+
+            <!-- قسم: الأسئلة الشائعة -->
+            <section class="info-section card">
+                <h2 class="card-title">أسئلة شائعة</h2>
+                <ul class="info-list">
+                    <li><strong>هل يتم حفظ البيانات تلقائيًا؟</strong> نعم، كل كلمة أو تعديل يتم حفظه فورًا.</li>
+                    <li><strong>هل تضيع البيانات عند تحديث المتصفح؟</strong> لا، طالما لم يتم مسح التخزين المحلي.</li>
+                    <li><strong>هل يمكن استخدام القاموس بدون إنترنت؟</strong> نعم، يعمل محليًا بالكامل.</li>
+                    <li><strong>هل يمكن مشاركة القاموس بين عدة أجهزة؟</strong> نعم عبر التصدير والاستيراد.</li>
+                </ul>
+            </section>
+
+        </div>
+    </main>
+
+    <!-- الفوتر -->
+    <footer class="app-footer">
+        <div class="container footer-content">
+            <div class="footer-main">
+                <span class="footer-title">قاموس الطالب</span>
+                <span class="footer-subtitle">أداة تعليمية سهلة للمنزل والطلاب.</span>
+            </div>
+            <div class="footer-links">
+                <a href="about.html">عن القاموس</a>
+                <a href="help.html">مساعدة</a>
+            </div>
+        </div>
+    </footer>
+
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const navToggle = document.querySelector(".nav-toggle");
+    const mainNav   = document.querySelector(".main-nav");
+
+    if (navToggle && mainNav) {
+        navToggle.addEventListener("click", function () {
+            const isOpen = mainNav.classList.toggle("nav-open");
+            navToggle.classList.toggle("nav-open", isOpen);
+            navToggle.setAttribute("aria-expanded", isOpen ? "true" : "false");
+        });
+    }
+});
+</script>
+
+</body>
+</html>
