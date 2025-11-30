@@ -1,6 +1,6 @@
 {
   "name": "قاموس الطالب",
-  "short_name": "قاموس_الطالب",
+  "short_name": "قاموس الطالب",
   "lang": "ar",
   "dir": "rtl",
   "start_url": "index.html",
@@ -22,4 +22,5 @@
     }
   ]
 }
+
 
