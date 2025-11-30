@@ -1,6 +1,6 @@
 {
   "name": "قاموس الطالب",
-  "short_name": "StudentDict",
+  "short_name": "قاموس_الطالب",
   "lang": "ar",
   "dir": "rtl",
   "start_url": "index.html",
@@ -22,3 +22,4 @@
     }
   ]
 }
+
