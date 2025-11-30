@@ -1,0 +1,54 @@
+{
+  "name": "قاموس الطالب",
+  "short_name": "قاموس الطالب",
+  "lang": "ar",
+  "dir": "rtl",
+  "start_url": "index.html",
+  "scope": "./",
+  "display": "standalone",
+  "theme_color": "#0f172a",
+  "background_color": "#0f172a",
+
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+
+  "shortcuts": [
+    {
+      "name": "فتح القاموس",
+      "short_name": "القاموس",
+      "description": "الانتقال مباشرة إلى صفحة القاموس",
+      "url": "dictionary.html",
+      "icons": [
+        { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" }
+      ]
+    },
+    {
+      "name": "إدارة الطلاب",
+      "short_name": "الطلاب",
+      "description": "فتح صفحة إدارة الطلاب مباشرة",
+      "url": "students.html",
+      "icons": [
+        { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" }
+      ]
+    },
+    {
+      "name": "إنشاء اختبار",
+      "short_name": "اختبار",
+      "description": "بدء صفحة الاختبارات مباشرة",
+      "url": "quiz.html",
+      "icons": [
+        { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" }
+      ]
+    }
+  ]
+}
